@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CGI Commit Analytics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <style>
+    :root {
+      --cgi-red: #DC0032;
+      --cgi-red-dark: #9e0023;
+      --cgi-red-light: #ff4060;
+      --cgi-purple: #6B2D8B;
+      --cgi-purple-dark: #4a1f61;
+      --cgi-purple-light: #9b5db8;
+      --gray-900: #111111;
+      --gray-800: #222222;
+      --gray-700: #333333;
+      --gray-600: #555555;
+      --gray-500: #777777;
+      --gray-400: #999999;
+      --gray-300: #BBBBBB;
+      --gray-200: #DDDDDD;
+      --gray-100: #F0F0F0;
+      --gray-50:  #F7F7F7;
+      --white: #FFFFFF;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Full-viewport lock ── */
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+    }
+
+    body { display: flex; flex-direction: column; }
+
+    /* ── Header ── */
+    header {
+      flex-shrink: 0;
+      height: 46px;
+      background: var(--gray-900);
+      border-bottom: 3px solid var(--cgi-red);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 14px;
+    }
+    header img { height: 26px; }
+    header h1 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--white);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    header .tagline {
+      font-size: 0.7rem;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    header .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    /* ── Toolbar (upload + filter merged) ── */
+    .toolbar {
+      flex-shrink: 0;
+      height: 38px;
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 14px;
+    }
+    .toolbar-sep { width: 1px; height: 20px; background: var(--gray-200); }
+    .toolbar label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+    .upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--cgi-red);
+      color: var(--white);
+      border: none;
+      border-radius: 3px;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .upload-btn:hover { background: var(--cgi-red-dark); }
+    #fileInput { display: none; }
+    .file-info { font-size: 0.75rem; color: var(--gray-400); }
+    .file-info span { color: var(--cgi-purple); font-weight: 600; }
+    .toolbar select {
+      border: 1.5px solid var(--gray-200);
+      border-radius: 3px;
+      padding: 3px 8px;
+      font-size: 0.78rem;
+      font-family: inherit;
+      color: var(--gray-800);
+      background: var(--gray-50);
+      cursor: pointer;
+      height: 26px;
+    }
+    .toolbar select:focus { outline: none; border-color: var(--cgi-red); }
+    .filter-arrow { color: var(--gray-400); font-size: 0.8rem; }
+    .btn-reset {
+      background: var(--gray-100);
+      border: 1.5px solid var(--gray-200);
+      border-radius: 3px;
+      padding: 3px 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--gray-600);
+      cursor: pointer;
+      height: 26px;
+      transition: background 0.15s;
+    }
+    .btn-reset:hover { background: var(--gray-200); }
+
+    /* ── KPI strip ── */
+    .kpi-strip {
+      flex-shrink: 0;
+      display: flex;
+      gap: 10px;
+      padding: 8px 20px 6px;
+      background: var(--gray-100);
+    }
+    .kpi-card {
+      flex: 1;
+      background: var(--white);
+      border-radius: 6px;
+      padding: 8px 14px;
+      border-left: 3px solid var(--cgi-red);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      min-width: 0;
+    }
+    .kpi-card.purple { border-left-color: var(--cgi-purple); }
+    .kpi-card.dark   { border-left-color: var(--gray-500); }
+    .kpi-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    .kpi-value {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      white-space: nowrap;
+    }
+    .kpi-sub {
+      font-size: 0.65rem;
+      color: var(--gray-400);
+      white-space: nowrap;
+    }
+
+    /* ── Main two-pane area ── */
+    .content-area {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      gap: 0;
+    }
+
+    /* ── Charts pane ── */
+    .charts-pane {
+      flex: 1;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 10px;
+      padding: 10px 10px 10px 14px;
+    }
+
+    .chart-card {
+      background: var(--white);
+      border-radius: 6px;
+      padding: 10px 14px 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .chart-card.span3 { grid-column: 1 / 4; }
+
+    .chart-card h2 {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--gray-500);
+      margin-bottom: 6px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chart-card h2::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      background: var(--cgi-red);
+      flex-shrink: 0;
+    }
+    .chart-card h2.purple::before { background: var(--cgi-purple); }
+    .chart-card h2.dark::before   { background: var(--gray-500); }
+
+    .chart-wrap {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+    }
+
+    /* ── Notes sidebar ── */
+    .notes-pane {
+      flex-shrink: 0;
+      width: 310px;
+      border-left: 1px solid var(--gray-200);
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .notes-header {
+      flex-shrink: 0;
+      padding: 10px 14px 8px;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .notes-header h2 {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--gray-500);
+    }
+    .notes-header h2::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      background: var(--cgi-purple);
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .notes-form {
+      flex-shrink: 0;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .notes-form input, .notes-form textarea {
+      border: 1.5px solid var(--gray-200);
+      border-radius: 4px;
+      padding: 5px 9px;
+      font-size: 0.78rem;
+      font-family: inherit;
+      color: var(--gray-800);
+      background: var(--gray-50);
+      resize: none;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+    .notes-form input:focus, .notes-form textarea:focus {
+      outline: none;
+      border-color: var(--cgi-purple);
+      background: var(--white);
+    }
+    .notes-form textarea { height: 56px; }
+    .notes-form-row { display: flex; gap: 6px; }
+    .notes-form-row input { flex: 1; min-width: 0; }
+    .notes-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      border: none;
+      border-radius: 3px;
+      padding: 5px 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .btn-primary { background: var(--cgi-red); color: var(--white); }
+    .btn-primary:hover { background: var(--cgi-red-dark); }
+    .btn-secondary { background: var(--gray-100); color: var(--gray-700); border: 1.5px solid var(--gray-200); }
+    .btn-secondary:hover { background: var(--gray-200); }
+    .btn-purple { background: var(--cgi-purple); color: var(--white); }
+    .btn-purple:hover { background: var(--cgi-purple-dark); }
+
+    /* Note type tabs */
+    .note-type-tabs {
+      display: flex;
+      gap: 4px;
+    }
+    .note-type-tab {
+      flex: 1;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 3px;
+      padding: 4px 8px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      background: var(--gray-50);
+      color: var(--gray-500);
+      transition: all 0.15s;
+    }
+    .note-type-tab:hover { background: var(--gray-200); }
+    .note-type-tab.active-analysis {
+      background: var(--cgi-purple);
+      color: var(--white);
+      border-color: var(--cgi-purple);
+    }
+    .note-type-tab.active-hypothesis {
+      background: var(--cgi-red);
+      color: var(--white);
+      border-color: var(--cgi-red);
+    }
+
+    /* Note badges */
+    .note-badge {
+      display: inline-block;
+      font-size: 0.55rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 1px 5px;
+      border-radius: 2px;
+      margin-bottom: 3px;
+    }
+    .note-badge.analysis  { background: #f0eaf6; color: var(--cgi-purple); }
+    .note-badge.hypothesis { background: #ffeaee; color: var(--cgi-red); }
+
+    /* Hypothesis note items */
+    .note-item.hypothesis { border-left-color: var(--cgi-red); }
+    .note-item.hypothesis .note-title { color: var(--cgi-red); }
+
+    /* Saved notes list */
+    .notes-list-wrap {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 8px 14px 10px;
+    }
+    .notes-list-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--gray-400);
+      margin-bottom: 7px;
+    }
+    .note-item {
+      background: var(--gray-50);
+      border-left: 3px solid var(--cgi-purple);
+      border-radius: 0 5px 5px 0;
+      padding: 7px 10px;
+      margin-bottom: 7px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .note-item .note-body { flex: 1; min-width: 0; }
+    .note-item .note-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--cgi-purple);
+      margin-bottom: 2px;
+    }
+    .note-item .note-period {
+      font-size: 0.68rem;
+      color: var(--gray-400);
+      margin-bottom: 3px;
+    }
+    .note-item .note-text {
+      font-size: 0.75rem;
+      color: var(--gray-700);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .note-del {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--gray-300);
+      font-size: 0.85rem;
+      padding: 1px 3px;
+      border-radius: 3px;
+      flex-shrink: 0;
+      transition: color 0.15s, background 0.15s;
+    }
+    .note-del:hover { color: var(--cgi-red); background: #ffeaee; }
+    .no-notes {
+      font-size: 0.75rem;
+      color: var(--gray-300);
+      font-style: italic;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      flex-shrink: 0;
+      height: 22px;
+      text-align: center;
+      line-height: 22px;
+      font-size: 0.68rem;
+      color: var(--gray-400);
+      border-top: 1px solid var(--gray-200);
+      background: var(--white);
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--gray-900);
+      color: var(--white);
+      padding: 8px 16px;
+      border-radius: 5px;
+      font-size: 0.78rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 9999;
+      border-left: 3px solid var(--cgi-red);
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <img src="image.png" alt="CGI">
+  <div>
+    <h1>Commit Analytics</h1>
+    <div class="tagline">Repository Activity Dashboard</div>
+  </div>
+  <div class="header-right">
+    <span id="footerRange" style="font-size:0.72rem;color:var(--gray-400);"></span>
+  </div>
+</header>
+
+<!-- Toolbar: upload + filter in one bar -->
+<div class="toolbar">
+  <label>Data</label>
+  <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+    </svg>
+    Load CSV
+  </button>
+  <input type="file" id="fileInput" accept=".csv">
+  <div class="file-info" id="fileInfo">Using <span>aggregate.csv</span></div>
+
+  <div class="toolbar-sep"></div>
+
+  <label>Period</label>
+  <select id="fromMonth"></select>
+  <span class="filter-arrow">→</span>
+  <select id="toMonth"></select>
+  <button class="btn-reset" onclick="resetFilter()">Reset</button>
+</div>
+
+<!-- KPI strip -->
+<div class="kpi-strip" id="kpiStrip"></div>
+
+<!-- Main: charts + notes sidebar -->
+<div class="content-area">
+
+  <!-- Charts: 3×3 grid -->
+  <div class="charts-pane">
+
+    <div class="chart-card span3">
+      <h2>Commits per Month</h2>
+      <div class="chart-wrap"><canvas id="commitsChart"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <h2>Insertions vs Deletions</h2>
+      <div class="chart-wrap"><canvas id="insDelChart"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <h2 class="purple">Average Commit Size (lines)</h2>
+      <div class="chart-wrap"><canvas id="avgSizeChart"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <h2 class="dark">Avg Message Length (chars)</h2>
+      <div class="chart-wrap"><canvas id="msgChart"></canvas></div>
+    </div>
+
+    <div class="chart-card span3">
+      <h2 class="purple">Code Churn Ratio — deletions ÷ insertions</h2>
+      <div class="chart-wrap"><canvas id="churnChart"></canvas></div>
+    </div>
+
+  </div>
+
+  <!-- Notes sidebar -->
+  <div class="notes-pane">
+    <div class="notes-header">
+      <h2>Analysis Notes</h2>
+    </div>
+    <div class="notes-form">
+      <div class="note-type-tabs">
+        <button class="note-type-tab active-analysis" id="tabAnalysis" onclick="setNoteType('analysis')">Analysis</button>
+        <button class="note-type-tab" id="tabHypothesis" onclick="setNoteType('hypothesis')">Hypothesis</button>
+      </div>
+      <div class="notes-form-row">
+        <input type="text" id="noteTitle" placeholder="Title…">
+        <input type="text" id="notePeriod" placeholder="Period…" style="max-width:100px;">
+      </div>
+      <textarea id="noteText" placeholder="Write your observation here…"></textarea>
+      <div class="notes-actions">
+        <button class="btn btn-purple" id="addNoteBtn" onclick="addNote()">Add Note</button>
+        <button class="btn btn-purple" onclick="exportNotes()">Export</button>
+        <button class="btn btn-secondary" onclick="importNotesFile()">Import</button>
+        <input type="file" id="notesImport" accept=".json" style="display:none" onchange="importNotes(event)">
+      </div>
+    </div>
+    <div class="notes-list-wrap">
+      <div class="notes-list-label">Saved Notes</div>
+      <div id="notesList"><p class="no-notes">No notes yet.</p></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>CGI Commit Analytics &nbsp;·&nbsp; <span id="repoInfo"></span></footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Palette ──────────────────────────────────────────────────────────────────
+const RED    = '#DC0032';
+const RED2   = '#ff4060';
+const PURPLE = '#6B2D8B';
+const PURP2  = '#9b5db8';
+const DARK   = '#555555';
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let allRows  = [];
+let notes    = JSON.parse(localStorage.getItem('cgi_notes') || '[]');
+let charts   = {};
+let noteType = 'analysis';
+
+// ── CSV parsing ───────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const vals = line.split(',');
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = isNaN(vals[i]) ? vals[i].trim() : parseFloat(vals[i]); });
+    return obj;
+  }).filter(r => r.month);
+}
+
+const EMBEDDED_CSV = `month,repos,commits,insertions,deletions,total_msg_chars,avg_insertions,avg_deletions,avg_msg_length
+2024-07,12,82,2273,547,9583,27.7,6.7,116.9
+2024-08,12,152,33402,12474,7977,219.8,82.1,52.5
+2024-09,12,239,28441,6384,11677,119.0,26.7,48.9
+2024-10,12,248,8281,3006,13847,33.4,12.1,55.8
+2024-11,12,213,7811,3198,10820,36.7,15.0,50.8
+2024-12,12,163,4517,2728,8458,27.7,16.7,51.9
+2025-01,12,150,8153,7057,7595,54.4,47.0,50.6
+2025-02,12,223,15413,9443,9376,69.1,42.3,42.0
+2025-03,12,157,13932,11733,6413,88.7,74.7,40.8
+2025-04,12,125,9241,7435,5471,73.9,59.5,43.8
+2025-05,12,116,6363,1275,5330,54.9,11.0,45.9
+2025-06,12,188,7696,2305,12141,40.9,12.3,64.6
+2025-07,12,88,3284,1594,4487,37.3,18.1,51.0
+2025-08,12,164,3860,835,8000,23.5,5.1,48.8
+2025-09,12,144,9266,3757,12421,64.3,26.1,86.3
+2025-10,12,192,23032,6745,10125,120.0,35.1,52.7
+2025-11,12,167,14854,7402,11629,88.9,44.3,69.6
+2025-12,12,141,8598,1277,7189,61.0,9.1,51.0
+2026-01,12,154,7182,3258,9113,46.6,21.2,59.2
+2026-02,12,123,12072,8796,7105,98.1,71.5,57.8
+2026-03,12,168,9296,2189,9044,55.3,13.0,53.8
+2026-04,12,114,18601,14186,6150,163.2,124.4,53.9
+2026-05,12,94,8087,1803,4672,86.0,19.2,49.7
+2026-06,12,31,1681,305,1694,54.2,9.8,54.6`;
+
+// ── File upload ───────────────────────────────────────────────────────────────
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    allRows = parseCSV(ev.target.result);
+    document.getElementById('fileInfo').innerHTML = `Loaded <span>${file.name}</span> (${allRows.length} rows)`;
+    rebuildFilters();
+    render();
+    toast('Loaded ' + file.name);
+  };
+  reader.readAsText(file);
+});
+
+// ── Filter selects ────────────────────────────────────────────────────────────
+function rebuildFilters() {
+  const months = allRows.map(r => r.month);
+  const from = document.getElementById('fromMonth');
+  const to   = document.getElementById('toMonth');
+  const savedFrom = from.value, savedTo = to.value;
+  from.innerHTML = months.map(m => `<option value="${m}">${m}</option>`).join('');
+  to.innerHTML   = months.map(m => `<option value="${m}">${m}</option>`).join('');
+  from.value = months.includes(savedFrom) ? savedFrom : months[0];
+  to.value   = months.includes(savedTo)   ? savedTo   : months[months.length - 1];
+  from.onchange = render;
+  to.onchange   = render;
+}
+
+function getFilteredRows() {
+  const from = document.getElementById('fromMonth').value;
+  const to   = document.getElementById('toMonth').value;
+  return allRows.filter(r => r.month >= from && r.month <= to);
+}
+
+function resetFilter() {
+  const months = allRows.map(r => r.month);
+  document.getElementById('fromMonth').value = months[0];
+  document.getElementById('toMonth').value   = months[months.length - 1];
+  render();
+}
+
+// ── KPI ───────────────────────────────────────────────────────────────────────
+function fmt(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000)    return (n/1000).toFixed(1) + 'k';
+  return Math.round(n).toString();
+}
+
+function renderKPIs(rows) {
+  const totalCommits = rows.reduce((s,r) => s + r.commits, 0);
+  const totalIns     = rows.reduce((s,r) => s + r.insertions, 0);
+  const totalDel     = rows.reduce((s,r) => s + r.deletions, 0);
+  const avgMsg       = (rows.reduce((s,r) => s + r.avg_msg_length, 0) / rows.length).toFixed(1);
+  const peakRow      = rows.reduce((b,r) => r.commits > b.commits ? r : b, rows[0]);
+
+  document.getElementById('kpiStrip').innerHTML = `
+    <div class="kpi-card">
+      <div class="kpi-label">Total Commits</div>
+      <div class="kpi-value">${fmt(totalCommits)}</div>
+      <div class="kpi-sub">over ${rows.length} months</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Lines Inserted</div>
+      <div class="kpi-value">${fmt(totalIns)}</div>
+      <div class="kpi-sub">${fmt(totalDel)} deleted</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">Net Lines Added</div>
+      <div class="kpi-value">${fmt(totalIns - totalDel)}</div>
+      <div class="kpi-sub">churn ${(totalDel/totalIns*100).toFixed(0)}%</div>
+    </div>
+    <div class="kpi-card dark">
+      <div class="kpi-label">Avg Msg Length</div>
+      <div class="kpi-value">${avgMsg}</div>
+      <div class="kpi-sub">chars / commit</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Peak Month</div>
+      <div class="kpi-value">${peakRow ? peakRow.commits : '–'}</div>
+      <div class="kpi-sub">${peakRow ? peakRow.month : ''}</div>
+    </div>
+  `;
+}
+
+// ── Chart helpers ─────────────────────────────────────────────────────────────
+Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+Chart.defaults.font.size   = 10;
+Chart.defaults.color       = '#777777';
+
+const baseOpts = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+  scales: {
+    x: { grid: { display: false }, ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 14 } },
+    y: { grid: { color: '#eeeeee' }, ticks: { maxTicksLimit: 5 } },
+  },
+};
+
+function aiAnnotation(labels) {
+  const idx = labels.indexOf('2026-01');
+  if (idx < 0) return {};
+  return {
+    annotation: {
+      annotations: {
+        aiStart: {
+          type: 'line',
+          xMin: idx - 0.5,
+          xMax: idx - 0.5,
+          borderColor: 'rgba(107,45,139,0.55)',
+          borderWidth: 1.5,
+          borderDash: [5, 4],
+          label: {
+            display: true,
+            content: 'AI permitted',
+            color: '#6B2D8B',
+            backgroundColor: 'rgba(255,255,255,0.92)',
+            borderColor: 'rgba(107,45,139,0.35)',
+            borderWidth: 1,
+            borderRadius: 3,
+            font: { size: 9, weight: '700' },
+            position: 'start',
+            yAdjust: 8,
+          }
+        }
+      }
+    }
+  };
+}
+
+function makeOrUpdate(id, type, data, options) {
+  if (charts[id]) { charts[id].data = data; charts[id].options = options; charts[id].update(); }
+  else { charts[id] = new Chart(document.getElementById(id), { type, data, options }); }
+}
+
+// ── Main render ───────────────────────────────────────────────────────────────
+function render() {
+  const rows   = getFilteredRows();
+  const labels = rows.map(r => r.month);
+  renderKPIs(rows);
+
+  // 1. Commits per month
+  const maxC = Math.max(...rows.map(r => r.commits));
+  makeOrUpdate('commitsChart', 'bar', {
+    labels,
+    datasets: [{ label: 'Commits', data: rows.map(r => r.commits),
+      backgroundColor: rows.map(r => r.commits === maxC ? RED : RED + '99'),
+      borderColor: RED, borderWidth: 1, borderRadius: 3 }]
+  }, { ...baseOpts, plugins: { ...baseOpts.plugins, ...aiAnnotation(labels), tooltip: { callbacks: { label: c => ` ${c.parsed.y} commits` } } } });
+
+  // 2. Insertions vs Deletions
+  makeOrUpdate('insDelChart', 'bar', { labels, datasets: [
+    { label: 'Insertions', data: rows.map(r => r.insertions), backgroundColor: RED + 'cc', borderRadius: 2 },
+    { label: 'Deletions',  data: rows.map(r => r.deletions),  backgroundColor: PURPLE + 'bb', borderRadius: 2 },
+  ]}, { ...baseOpts, plugins: { ...baseOpts.plugins, ...aiAnnotation(labels), legend: { display: true, position: 'top', labels: { boxWidth: 10, padding: 8, font: { size: 10 } } } } });
+
+  // 3. Avg commit size
+  makeOrUpdate('avgSizeChart', 'line', { labels, datasets: [
+    { label: 'Avg Ins', data: rows.map(r => r.avg_insertions), borderColor: PURPLE, backgroundColor: PURPLE+'22', fill: true, tension: 0.35, pointRadius: 2, borderWidth: 2 },
+    { label: 'Avg Del', data: rows.map(r => r.avg_deletions),  borderColor: PURP2,  backgroundColor: PURP2+'11',  fill: false, tension: 0.35, pointRadius: 2, borderWidth: 2, borderDash: [5,3] },
+  ]}, { ...baseOpts, plugins: { ...baseOpts.plugins, ...aiAnnotation(labels), legend: { display: true, position: 'top', labels: { boxWidth: 10, padding: 8, font: { size: 10 } } } } });
+
+  // 4. Avg message length
+  makeOrUpdate('msgChart', 'line', { labels, datasets: [
+    { label: 'Avg Msg', data: rows.map(r => r.avg_msg_length), borderColor: DARK, backgroundColor: DARK+'18', fill: true, tension: 0.35, pointRadius: 2, borderWidth: 2 },
+  ]}, { ...baseOpts, plugins: { ...baseOpts.plugins, ...aiAnnotation(labels) } });
+
+  // 5. Churn ratio
+  makeOrUpdate('churnChart', 'line', { labels, datasets: [
+    { label: 'Churn', data: rows.map(r => r.insertions > 0 ? +(r.deletions/r.insertions).toFixed(3) : 0),
+      borderColor: RED2, backgroundColor: RED2+'22', fill: true, tension: 0.35, pointRadius: 2, borderWidth: 2 },
+  ]}, { ...baseOpts, plugins: { ...baseOpts.plugins, ...aiAnnotation(labels), tooltip: { callbacks: { label: c => ` ${(c.parsed.y*100).toFixed(1)}% churn` } } },
+    scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { maxTicksLimit: 5, callback: v => (v*100).toFixed(0)+'%' } } } });
+
+  // Sync range display
+  if (rows.length) {
+    const range = rows[0].month + ' – ' + rows[rows.length-1].month;
+    document.getElementById('footerRange').textContent = range;
+    document.getElementById('repoInfo').textContent = `${rows[0].repos || 12} repos · ${range}`;
+  }
+}
+
+// ── Notes ─────────────────────────────────────────────────────────────────────
+const NOTE_PLACEHOLDERS = {
+  analysis:   'Write your observation here…',
+  hypothesis: 'What did you hear from the team? Add your data-based comment…',
+};
+
+function setNoteType(type) {
+  noteType = type;
+  document.getElementById('tabAnalysis').className   = 'note-type-tab' + (type === 'analysis'   ? ' active-analysis'   : '');
+  document.getElementById('tabHypothesis').className = 'note-type-tab' + (type === 'hypothesis' ? ' active-hypothesis' : '');
+  document.getElementById('noteText').placeholder    = NOTE_PLACEHOLDERS[type];
+  document.getElementById('addNoteBtn').className    = 'btn ' + (type === 'hypothesis' ? 'btn-primary' : 'btn-purple');
+}
+
+function addNote() {
+  const title  = document.getElementById('noteTitle').value.trim();
+  const period = document.getElementById('notePeriod').value.trim();
+  const text   = document.getElementById('noteText').value.trim();
+  if (!title && !text) { toast('Enter a title or note.'); return; }
+  notes.push({ id: Date.now(), title: title || 'Note', period, text, type: noteType });
+  saveNotes(); renderNotes();
+  document.getElementById('noteTitle').value = '';
+  document.getElementById('notePeriod').value = '';
+  document.getElementById('noteText').value = '';
+  toast('Note saved.');
+}
+
+function deleteNote(id) { notes = notes.filter(n => n.id !== id); saveNotes(); renderNotes(); }
+function saveNotes() { localStorage.setItem('cgi_notes', JSON.stringify(notes)); }
+
+function renderNotes() {
+  const el = document.getElementById('notesList');
+  if (!notes.length) { el.innerHTML = '<p class="no-notes">No notes yet.</p>'; return; }
+  el.innerHTML = notes.slice().reverse().map(n => {
+    const type = n.type || 'analysis';
+    return `
+    <div class="note-item ${type}">
+      <div class="note-body">
+        <div class="note-badge ${type}">${type === 'hypothesis' ? 'Hypothesis' : 'Analysis'}</div>
+        ${n.period ? `<div class="note-period">${n.period}</div>` : ''}
+        <div class="note-title">${esc(n.title)}</div>
+        <div class="note-text">${esc(n.text)}</div>
+      </div>
+      <button class="note-del" onclick="deleteNote(${n.id})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function exportNotes() {
+  if (!notes.length) { toast('No notes to export.'); return; }
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([JSON.stringify(notes,null,2)], {type:'application/json'})),
+    download: 'cgi-notes.json'
+  });
+  a.click(); toast('Exported.');
+}
+
+function importNotesFile() { document.getElementById('notesImport').click(); }
+
+function importNotes(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const imp = JSON.parse(ev.target.result);
+      if (!Array.isArray(imp)) throw 0;
+      const existing = new Set(notes.map(n=>n.id));
+      const added = imp.filter(n=>!existing.has(n.id));
+      notes = [...notes, ...added]; saveNotes(); renderNotes();
+      toast(`Imported ${added.length} note(s).`);
+    } catch { toast('Invalid file.'); }
+  };
+  reader.readAsText(file); e.target.value = '';
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+allRows = parseCSV(EMBEDDED_CSV);
+rebuildFilters();
+render();
+renderNotes();
+</script>
+</body>
+</html>
