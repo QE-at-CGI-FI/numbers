@@ -1,2 +1,3 @@
-aggregate_1.csv
+aggregate_*.csv
+cgi-notes_*.json
 claims.md
