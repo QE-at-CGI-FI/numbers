@@ -272,6 +272,37 @@
       margin-right: 6px;
       vertical-align: middle;
     }
+    .ai-start-row {
+      flex-shrink: 0;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ai-start-row label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    .ai-start-row input[type="date"] {
+      flex: 1;
+      min-width: 0;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 4px;
+      padding: 4px 7px;
+      font-size: 0.74rem;
+      font-family: inherit;
+      color: var(--gray-800);
+      background: var(--gray-50);
+    }
+    .ai-start-row input[type="date"]:focus {
+      outline: none;
+      border-color: var(--cgi-purple);
+      background: var(--white);
+    }
+    .ai-start-row .btn { padding: 4px 7px; }
     .notes-form {
       flex-shrink: 0;
       padding: 10px 14px;
@@ -543,6 +574,11 @@
     <div class="notes-header">
       <h2>Analysis Notes</h2>
     </div>
+    <div class="ai-start-row">
+      <label for="aiStartDate">AI use started</label>
+      <input type="date" id="aiStartDate" onchange="setAiStartDate(this.value)">
+      <button class="btn btn-secondary" onclick="clearAiStartDate()" title="Clear date">✕</button>
+    </div>
     <div class="notes-form">
       <div class="note-type-tabs">
         <button class="note-type-tab active-analysis" id="tabAnalysis" onclick="setNoteType('analysis')">Analysis</button>
@@ -585,6 +621,7 @@ let allRows  = [];
 let notes    = JSON.parse(localStorage.getItem('cgi_notes') || '[]');
 let charts   = {};
 let noteType = 'analysis';
+let aiStartDate = localStorage.getItem('cgi_ai_start_date') || '';
 
 // ── CSV parsing ───────────────────────────────────────────────────────────────
 function parseCSV(text) {
@@ -832,10 +869,24 @@ function renderNotes() {
 
 function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+// ── AI adoption start date ───────────────────────────────────────────────────
+function setAiStartDate(value) {
+  aiStartDate = value;
+  if (aiStartDate) localStorage.setItem('cgi_ai_start_date', aiStartDate);
+  else localStorage.removeItem('cgi_ai_start_date');
+  toast(aiStartDate ? `AI use start set to ${aiStartDate}.` : 'AI use start date cleared.');
+}
+
+function clearAiStartDate() {
+  document.getElementById('aiStartDate').value = '';
+  setAiStartDate('');
+}
+
 function exportNotes() {
-  if (!notes.length) { toast('No notes to export.'); return; }
+  if (!notes.length && !aiStartDate) { toast('Nothing to export.'); return; }
+  const payload = { aiStartDate: aiStartDate || null, notes };
   const a = Object.assign(document.createElement('a'), {
-    href: URL.createObjectURL(new Blob([JSON.stringify(notes,null,2)], {type:'application/json'})),
+    href: URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)], {type:'application/json'})),
     download: 'cgi-notes.json'
   });
   a.click(); toast('Exported.');
@@ -848,12 +899,20 @@ function importNotes(e) {
   const reader = new FileReader();
   reader.onload = ev => {
     try {
-      const imp = JSON.parse(ev.target.result);
+      const parsed = JSON.parse(ev.target.result);
+      const imp = Array.isArray(parsed) ? parsed : parsed.notes;
       if (!Array.isArray(imp)) throw 0;
       const existing = new Set(notes.map(n=>n.id));
       const added = imp.filter(n=>!existing.has(n.id));
       notes = [...notes, ...added]; saveNotes(); renderNotes();
-      toast(`Imported ${added.length} note(s).`);
+      let msg = `Imported ${added.length} note(s).`;
+      if (!Array.isArray(parsed) && parsed.aiStartDate) {
+        aiStartDate = parsed.aiStartDate;
+        localStorage.setItem('cgi_ai_start_date', aiStartDate);
+        document.getElementById('aiStartDate').value = aiStartDate;
+        msg += ` AI start date set to ${aiStartDate}.`;
+      }
+      toast(msg);
     } catch { toast('Invalid file.'); }
   };
   reader.readAsText(file); e.target.value = '';
@@ -869,6 +928,7 @@ function toast(msg) {
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
+document.getElementById('aiStartDate').value = aiStartDate;
 renderNotes();
 fetch('aggregate.csv')
   .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
