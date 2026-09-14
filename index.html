@@ -111,7 +111,7 @@
     #fileInput { display: none; }
     .file-info { font-size: 0.75rem; color: var(--gray-400); }
     .file-info span { color: var(--cgi-purple); font-weight: 600; }
-    .toolbar select {
+    .toolbar select, .toolbar input[type="date"] {
       border: 1.5px solid var(--gray-200);
       border-radius: 3px;
       padding: 3px 8px;
@@ -122,7 +122,7 @@
       cursor: pointer;
       height: 26px;
     }
-    .toolbar select:focus { outline: none; border-color: var(--cgi-red); }
+    .toolbar select:focus, .toolbar input[type="date"]:focus { outline: none; border-color: var(--cgi-red); }
     .filter-arrow { color: var(--gray-400); font-size: 0.8rem; }
     .btn-reset {
       background: var(--gray-100);
@@ -272,37 +272,6 @@
       margin-right: 6px;
       vertical-align: middle;
     }
-    .ai-start-row {
-      flex-shrink: 0;
-      padding: 8px 14px;
-      border-bottom: 1px solid var(--gray-100);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .ai-start-row label {
-      font-size: 0.68rem;
-      font-weight: 700;
-      color: var(--gray-500);
-      white-space: nowrap;
-    }
-    .ai-start-row input[type="date"] {
-      flex: 1;
-      min-width: 0;
-      border: 1.5px solid var(--gray-200);
-      border-radius: 4px;
-      padding: 4px 7px;
-      font-size: 0.74rem;
-      font-family: inherit;
-      color: var(--gray-800);
-      background: var(--gray-50);
-    }
-    .ai-start-row input[type="date"]:focus {
-      outline: none;
-      border-color: var(--cgi-purple);
-      background: var(--white);
-    }
-    .ai-start-row .btn { padding: 4px 7px; }
     .notes-form {
       flex-shrink: 0;
       padding: 10px 14px;
@@ -526,6 +495,12 @@
 
   <div class="toolbar-sep"></div>
 
+  <label for="aiStartDate">AI start</label>
+  <input type="date" id="aiStartDate" onchange="setAiStartDate(this.value)">
+  <button class="btn-reset" onclick="clearAiStartDate()" title="Clear AI start date">✕</button>
+
+  <div class="toolbar-sep"></div>
+
   <label>Period</label>
   <select id="fromMonth"></select>
   <span class="filter-arrow">→</span>
@@ -574,11 +549,6 @@
     <div class="notes-header">
       <h2>Analysis Notes</h2>
     </div>
-    <div class="ai-start-row">
-      <label for="aiStartDate">AI use started</label>
-      <input type="date" id="aiStartDate" onchange="setAiStartDate(this.value)">
-      <button class="btn btn-secondary" onclick="clearAiStartDate()" title="Clear date">✕</button>
-    </div>
     <div class="notes-form">
       <div class="note-type-tabs">
         <button class="note-type-tab active-analysis" id="tabAnalysis" onclick="setNoteType('analysis')">Analysis</button>
@@ -621,7 +591,7 @@ let allRows  = [];
 let notes    = JSON.parse(localStorage.getItem('cgi_notes') || '[]');
 let charts   = {};
 let noteType = 'analysis';
-let aiStartDate = localStorage.getItem('cgi_ai_start_date') || '';
+let aiStartDate = localStorage.getItem('cgi_ai_start_date') || '2026-01-01';
 
 // ── CSV parsing ───────────────────────────────────────────────────────────────
 function parseCSV(text) {
@@ -737,7 +707,8 @@ const baseOpts = {
 };
 
 function aiAnnotation(labels) {
-  const idx = labels.indexOf('2026-01');
+  if (!aiStartDate) return {};
+  const idx = labels.indexOf(aiStartDate.slice(0, 7));
   if (idx < 0) return {};
   return {
     annotation: {
@@ -875,6 +846,7 @@ function setAiStartDate(value) {
   if (aiStartDate) localStorage.setItem('cgi_ai_start_date', aiStartDate);
   else localStorage.removeItem('cgi_ai_start_date');
   toast(aiStartDate ? `AI use start set to ${aiStartDate}.` : 'AI use start date cleared.');
+  if (allRows.length) render();
 }
 
 function clearAiStartDate() {
@@ -910,6 +882,7 @@ function importNotes(e) {
         aiStartDate = parsed.aiStartDate;
         localStorage.setItem('cgi_ai_start_date', aiStartDate);
         document.getElementById('aiStartDate').value = aiStartDate;
+        if (allRows.length) render();
         msg += ` AI start date set to ${aiStartDate}.`;
       }
       toast(msg);
