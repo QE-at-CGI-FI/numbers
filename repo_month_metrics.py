@@ -1,184 +1,173 @@
 #!/usr/bin/env python3
 """
-git_metrics.py — collect monthly git activity metrics from one or more local
-repositories and write them to a CSV matching this schema:
+git_metrics.py — Collect monthly git commit metrics from a local repository
+and write them to CSV in the shape:
 
-    month,repos,commits,insertions,deletions,total_msg_chars,
-    avg_insertions,avg_deletions,avg_msg_length
-
-Where, for each calendar month (YYYY-MM):
-  repos            = number of distinct repos with >=1 commit that month
-  commits          = total commits across all repos that month
-  insertions       = total lines inserted (from numstat)
-  deletions        = total lines deleted (from numstat)
-  total_msg_chars  = total characters across all commit messages that month
-  avg_insertions   = insertions / commits
-  avg_deletions    = deletions / commits
-  avg_msg_length   = total_msg_chars / commits
+    month,repos,commits,insertions,deletions,total_msg_chars,avg_insertions,avg_deletions,avg_msg_length
 
 Usage:
-    python3 git_metrics.py /path/to/repo [/path/to/repo2 ...] -o metrics.csv
+    python3 git_metrics.py /path/to/repo -o metrics.csv
+    python3 git_metrics.py                 # defaults to current directory, git_metrics.csv
 
-Common options:
-    --author SUBSTRING   only count commits whose author name or email
-                          contains SUBSTRING (case-insensitive). Handy for
-                          "just my own commits" — e.g. --author you@example.com
-    --since DATE         passed straight to `git log --since=DATE`
-    --until DATE         passed straight to `git log --until=DATE`
-    --branch REF         branch/ref to walk (default: current HEAD in each repo)
-    --include-merges     include merge commits (excluded by default, since
-                          their numstat is usually empty/misleading)
+Options:
+    -o, --output FILE     Output CSV path (default: git_metrics.csv)
+    --all                 Include commits from all branches (git log --all)
+                           instead of just the current branch (HEAD).
+    --author PATTERN      Only count commits whose author name/email matches
+                           PATTERN (passed to `git log --author`).
+    --since DATE          Only count commits after DATE (e.g. 2025-01-01).
+    --until DATE          Only count commits before DATE.
 
-Example — your own commits across two repos, from 2025-01 onward:
-    python3 git_metrics.py ~/code/repo-a ~/code/repo-b \\
-        --author maaret.pyhajarvi@gmail.com --since 2025-01-01 \\
-        -o ts-pw-d365-ce-fo.csv
+By default counts ALL commits on the current branch (HEAD), regardless of
+author.
+
+Definitions:
+    repos            always 1 (single-repo run) — kept for CSV compatibility
+    commits          total commits that month
+    insertions       total lines inserted (from git numstat)
+    deletions        total lines deleted (from git numstat)
+    total_msg_chars  sum of commit message lengths (full message, subject+body,
+                      trailing blank lines stripped)
+    avg_insertions   insertions / commits
+    avg_deletions    deletions / commits
+    avg_msg_length   total_msg_chars / commits
 """
 
 import argparse
 import csv
+import os
+import re
 import subprocess
 import sys
 from collections import defaultdict
-from pathlib import Path
 
-RECORD_START = "\x02"
-FIELD_SEP = "\x1f"
-RECORD_END = "\x03"
+RS = "\x1e"  # record separator between commits
+US = "\x1f"  # unit separator between hash / date / message
+NUMSTAT_RE = re.compile(r"^(\d+|-)\t(\d+|-)\t")
 
 
-def run_git_log(repo_path, branch, author, since, until, include_merges):
-    fmt = f"{RECORD_START}%H{FIELD_SEP}%ad{FIELD_SEP}%an{FIELD_SEP}%ae{FIELD_SEP}%B{RECORD_END}"
-    cmd = [
-        "git", "-C", str(repo_path), "log",
-        f"--pretty=format:{fmt}",
-        "--date=format:%Y-%m",
-        "--numstat",
-    ]
-    if not include_merges:
-        cmd.append("--no-merges")
+def is_git_repo(path):
+    return subprocess.run(
+        ["git", "-C", path, "rev-parse", "--is-inside-work-tree"],
+        capture_output=True, text=True
+    ).stdout.strip() == "true"
+
+
+def run_git_log(repo_path, use_all=False, author=None, since=None, until=None):
+    fmt = f"{RS}%H{US}%ad{US}%B"
+    cmd = ["git", "-C", repo_path, "log", "--date=format:%Y-%m",
+           f"--pretty=format:{fmt}", "--numstat"]
+    if use_all:
+        cmd.append("--all")
     if author:
-        cmd.append(f"--author={author}")
-        cmd.append("-i")  # case-insensitive author match
+        cmd.extend(["--author", author])
     if since:
-        cmd.append(f"--since={since}")
+        cmd.extend(["--since", since])
     if until:
-        cmd.append(f"--until={until}")
-    if branch:
-        cmd.append(branch)
-
-    try:
-        out = subprocess.run(
-            cmd, capture_output=True, text=True, check=True
-        ).stdout
-    except subprocess.CalledProcessError as e:
-        print(f"git log failed for {repo_path}: {e.stderr}", file=sys.stderr)
-        sys.exit(1)
-    return out
+        cmd.extend(["--until", until])
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        sys.exit(f"error: git log failed for {repo_path}: {result.stderr.strip()}")
+    return result.stdout
 
 
-def parse_log(raw):
-    """Yield (month, msg_char_count, insertions, deletions) per commit."""
-    records = raw.split(RECORD_START)
-    for rec in records:
-        if not rec.strip():
+def parse_commits(raw_output):
+    """Yield (month, insertions, deletions, msg_len) per commit."""
+    for chunk in raw_output.split(RS):
+        if not chunk.strip():
             continue
-        if RECORD_END not in rec:
+        try:
+            commit_hash, date, remainder = chunk.split(US, 2)
+        except ValueError:
             continue
-        header, rest = rec.split(RECORD_END, 1)
-        parts = header.split(FIELD_SEP)
-        if len(parts) < 5:
-            continue
-        _commit_hash, month, _author_name, _author_email, message = (
-            parts[0], parts[1], parts[2], parts[3], FIELD_SEP.join(parts[4:])
-        )
-        message = message.strip("\n")
+        month = date.strip()
+        lines = remainder.split("\n")
 
+        # Walk from the bottom collecting numstat lines; everything above
+        # (minus trailing blank lines) is the commit message.
+        i = len(lines) - 1
         insertions = 0
         deletions = 0
-        for line in rest.splitlines():
-            line = line.strip()
-            if not line:
+        while i >= 0:
+            line = lines[i]
+            if line.strip() == "":
+                i -= 1
                 continue
-            cols = line.split("\t")
-            if len(cols) != 3:
-                continue
-            ins, dele, _fname = cols
-            if ins.isdigit():
-                insertions += int(ins)
-            if dele.isdigit():
-                deletions += int(dele)
+            m = NUMSTAT_RE.match(line)
+            if m:
+                added, removed = m.group(1), m.group(2)
+                if added != "-":
+                    insertions += int(added)
+                if removed != "-":
+                    deletions += int(removed)
+                i -= 1
+            else:
+                break
 
-        yield month, len(message), insertions, deletions
-
-
-def collect_metrics(repo_paths, branch, author, since, until, include_merges):
-    # month -> dict of aggregate counters
-    stats = defaultdict(lambda: {
-        "commits": 0, "insertions": 0, "deletions": 0, "msg_chars": 0,
-        "repos": set(),
-    })
-
-    for repo in repo_paths:
-        repo = Path(repo).expanduser().resolve()
-        if not (repo / ".git").exists():
-            print(f"warning: {repo} does not look like a git repo root (no .git), skipping", file=sys.stderr)
-            continue
-        raw = run_git_log(repo, branch, author, since, until, include_merges)
-        for month, msg_chars, insertions, deletions in parse_log(raw):
-            s = stats[month]
-            s["commits"] += 1
-            s["insertions"] += insertions
-            s["deletions"] += deletions
-            s["msg_chars"] += msg_chars
-            s["repos"].add(str(repo))
-
-    return stats
+        message = "\n".join(lines[:i + 1]).rstrip("\n")
+        msg_len = len(message)
+        yield month, insertions, deletions, msg_len
 
 
-def write_csv(stats, out_path):
+def main():
+    parser = argparse.ArgumentParser(description=__doc__,
+                                      formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("repo", nargs="?", default=".",
+                         help="Path to the git repository (default: current directory)")
+    parser.add_argument("-o", "--output", default="git_metrics.csv")
+    parser.add_argument("--all", action="store_true", help="Use `git log --all`")
+    parser.add_argument("--author", help="Filter commits by author pattern")
+    parser.add_argument("--since", help="Only commits after this date")
+    parser.add_argument("--until", help="Only commits before this date")
+    args = parser.parse_args()
+
+    repo_path = os.path.abspath(args.repo)
+    if not is_git_repo(repo_path):
+        sys.exit(f"error: {repo_path} is not a git repository")
+
+    # month -> aggregate stats
+    stats = defaultdict(lambda: {"commits": 0, "insertions": 0, "deletions": 0,
+                                  "total_msg_chars": 0})
+
+    raw = run_git_log(repo_path, use_all=args.all, author=args.author,
+                       since=args.since, until=args.until)
+    for month, ins, dele, msg_len in parse_commits(raw):
+        s = stats[month]
+        s["commits"] += 1
+        s["insertions"] += ins
+        s["deletions"] += dele
+        s["total_msg_chars"] += msg_len
+
     rows = []
     for month in sorted(stats.keys()):
         s = stats[month]
         commits = s["commits"]
         insertions = s["insertions"]
         deletions = s["deletions"]
-        msg_chars = s["msg_chars"]
-        repos = len(s["repos"])
+        total_msg_chars = s["total_msg_chars"]
         avg_insertions = round(insertions / commits, 1) if commits else 0.0
         avg_deletions = round(deletions / commits, 1) if commits else 0.0
-        avg_msg_length = round(msg_chars / commits, 1) if commits else 0.0
+        avg_msg_length = round(total_msg_chars / commits, 1) if commits else 0.0
         rows.append([
-            month, repos, commits, insertions, deletions, msg_chars,
-            avg_insertions, avg_deletions, avg_msg_length,
+            month,
+            1,  # repos — single-repo run
+            commits,
+            insertions,
+            deletions,
+            total_msg_chars,
+            avg_insertions,
+            avg_deletions,
+            avg_msg_length,
         ])
 
-    with open(out_path, "w", newline="") as f:
+    with open(args.output, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow([
-            "month", "repos", "commits", "insertions", "deletions",
-            "total_msg_chars", "avg_insertions", "avg_deletions", "avg_msg_length",
-        ])
+        writer.writerow(["month", "repos", "commits", "insertions", "deletions",
+                          "total_msg_chars", "avg_insertions", "avg_deletions",
+                          "avg_msg_length"])
         writer.writerows(rows)
 
-    print(f"Wrote {len(rows)} monthly rows to {out_path}")
-
-
-def main():
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("repos", nargs="+", help="Path(s) to local git repositories")
-    parser.add_argument("-o", "--output", default="git_metrics.csv", help="Output CSV path")
-    parser.add_argument("--author", default=None, help="Filter commits by author name/email substring (case-insensitive)")
-    parser.add_argument("--since", default=None, help="Only commits after this date (git --since format)")
-    parser.add_argument("--until", default=None, help="Only commits before this date (git --until format)")
-    parser.add_argument("--branch", default=None, help="Branch/ref to walk (default: repo's current HEAD)")
-    parser.add_argument("--include-merges", action="store_true", help="Include merge commits (excluded by default)")
-    args = parser.parse_args()
-
-    stats = collect_metrics(
-        args.repos, args.branch, args.author, args.since, args.until, args.include_merges
-    )
-    write_csv(stats, args.output)
+    print(f"Wrote {len(rows)} month(s) of metrics for {repo_path} to {args.output}")
 
 
 if __name__ == "__main__":
