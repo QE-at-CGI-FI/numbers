@@ -1,0 +1,41 @@
+10 tunnetuinta open source projektia
+
+1. linux kernel https://github.com/torvalds/linux
+2. react  https://github.com/react  ai aloitus jan 24, 2026
+3. kubernetes https://github.com/kubernetes
+4. VS code  https://github.com/microsoft/vscode
+5. TensorFlow https://github.com/tensorflow
+6. node.js https://github.com/nodejs
+7. Rust https://github.com/rust-lang
+8. Transformers https://github.com/huggingface/transformers
+9. Go https://github.com/golang
+10. FreeCodeCamp https://github.com/freeCodeCamp  ai aloitus jan 27, 2026
+
+10 tunnetuinta open source projektia jotka käyttävät tekoälyä
+
+1. Openclaw https://github.com/openclaw
+2. TensorFlow https://github.com/tensorflow
+3. Auto gpt https://github.com/Significant-Gravitas
+4. Ollama https://github.com/ollama
+5. Stable-diffusion-webui https://github.com/AUTOMATIC1111/stable-diffusion-webui
+6. Transformers https://github.com/huggingface/transformers
+7. Open-webui https://github.com/open-webui
+8. Langchain https://github.com/langchain-ai
+9. Claudecode https://github.com/anthropics/claude-code
+10. Llama.cpp https://github.com/ggml-org/llama.cpp 
+
+
+10 tunnetua projektia jotka eivät ole ai työkaluja mutta käyttävät ai ta tekemisessä
+
+1. selenium
+2. prestashop
+3. ghostty  https://github.com/ghostty-org/ghostty
+4. bun  https://github.com/oven-sh/bun
+5. ladybird  https://github.com/LadybirdBrowser/ladybird
+6. curl  curl — https://github.com/curl/curl
+7. redis  Redis — https://github.com/redis/redis
+8. gitlab  https://gitlab.com/gitlab-org/gitlab
+9. chromium  https://chromium.googlesource.com/chromium/src
+10.sentry  https://github.com/getsentry/sentry
+
+joko .github/copilot.mb tai .github/skills tai .github/agents tai .claude tai .cursor
