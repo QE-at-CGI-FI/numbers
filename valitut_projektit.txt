@@ -6,7 +6,7 @@
 4. VS code  https://github.com/microsoft/vscode
 5. TensorFlow https://github.com/tensorflow
 6. node.js https://github.com/nodejs
-7. Rust https://github.com/rust-lang
+7. Rust https://github.com/rust-lang ai aloitus Aug 12 2026
 8. Transformers https://github.com/huggingface/transformers
 9. Go https://github.com/golang
 10. FreeCodeCamp https://github.com/freeCodeCamp  ai aloitus jan 27, 2026
@@ -21,7 +21,7 @@
 6. Transformers https://github.com/huggingface/transformers
 7. Open-webui https://github.com/open-webui
 8. Langchain https://github.com/langchain-ai
-9. Claudecode https://github.com/anthropics/claude-code
+9. Claudecode https://github.com/anthropics/claude-code tehty
 10. Llama.cpp https://github.com/ggml-org/llama.cpp 
 
 

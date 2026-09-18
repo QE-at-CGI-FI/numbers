@@ -30,7 +30,8 @@ def run_git_log(repo, branch, include_merges, since, until):
         cmd.append(f'--since={since}')
     if until:
         cmd.append(f'--until={until}')
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = subprocess.run(cmd, capture_output=True, text=True,
+                             encoding='utf-8', errors='replace')
     if result.returncode != 0:
         raise RuntimeError(f'git log failed for {repo}: {result.stderr.strip()}')
     return result.stdout
