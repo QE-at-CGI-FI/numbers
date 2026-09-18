@@ -5,11 +5,11 @@
 3. kubernetes https://github.com/kubernetes
 4. VS code  https://github.com/microsoft/vscode
 5. TensorFlow https://github.com/tensorflow
-6. node.js https://github.com/nodejs
+6. node.js https://github.com/nodejs Aug 25, 2026
 7. Rust https://github.com/rust-lang ai aloitus Aug 12 2026
 8. Transformers https://github.com/huggingface/transformers
 9. Go https://github.com/golang
-10. FreeCodeCamp https://github.com/freeCodeCamp  ai aloitus jan 27, 2026
+10. FreeCodeCamp https://github.com/freeCodeCamp tehty  ai aloitus jan 27, 2026
 
 10 tunnetuinta open source projektia jotka käyttävät tekoälyä
 
