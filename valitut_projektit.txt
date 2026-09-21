@@ -2,7 +2,7 @@
 
 1. linux kernel https://github.com/torvalds/linux
 2. react  https://github.com/react  tehty ai aloitus jan 24, 2026
-3. kubernetes https://github.com/kubernetes ai aloitus May 9, 2026
+3. kubernetes https://github.com/kubernetes tehty ai aloitus May 9, 2026
 4. VS code  https://github.com/microsoft/vscode ai aloitus Oct 26, 2025
 5. TensorFlow https://github.com/tensorflow
 6. node.js https://github.com/nodejs

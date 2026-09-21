@@ -1,0 +1,20 @@
+name,size_kb,reason
+kubernetes,1523461,too large (1523461KB)
+website,565689,too large (565689KB)
+minikube,304266,too large (304266KB)
+test-infra,262937,too large (262937KB)
+enhancements,59221,too large (59221KB)
+community,99925,too large (99925KB)
+kops,503288,too large (503288KB)
+k8s.io,1521525,too large (1521525KB)
+perf-tests,116780,too large (116780KB)
+ingress-nginx,151328,archived
+dns,51712,too large (51712KB)
+autoscaler,270726,too large (270726KB)
+api,85358,too large (85358KB)
+sig-release,70412,too large (70412KB)
+ingress-gce,140786,too large (140786KB)
+cloud-provider-gcp,192488,too large (192488KB)
+cloud-provider-vsphere,78947,too large (78947KB)
+cloud-provider-alibaba-cloud,103761,too large (103761KB)
+design-proposals-archive,4212,archived
