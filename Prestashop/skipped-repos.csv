@@ -1,12 +1,1 @@
 repo,size_kb,size_mb,reason
-test-scenarios,12925374,12622,too large to clone (>50MB threshold)
-zip-archives,7568980,7392,too large to clone (>50MB threshold)
-prestashop.github.io,1181485,1154,too large to clone (>50MB threshold)
-user-documentation-v8-en,198248,194,too large to clone (>50MB threshold)
-user-documentation-en,170100,166,too large to clone (>50MB threshold)
-user-documentation-v8-fr,102842,100,too large to clone (>50MB threshold)
-user-documentation-fr,92508,90,too large to clone (>50MB threshold)
-user-documentation-1.6,89001,87,too large to clone (>50MB threshold)
-docker-templates,65478,64,too large to clone (>50MB threshold)
-functional-documentation,63768,62,too large to clone (>50MB threshold)
-prestashop-ui-kit,57168,56,too large to clone (>50MB threshold)
