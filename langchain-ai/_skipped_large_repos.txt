@@ -1,6 +1,0 @@
-langchainjs 686 MB (skipped, too large)
-langsmith-docs 850 MB (skipped, too large)
-langgraph 514 MB (skipped, too large)
-langchain-api-docs-html 4047 MB (skipped, too large)
-docs 1084 MB (skipped, too large)
-deepagents 312 MB (skipped, too large)

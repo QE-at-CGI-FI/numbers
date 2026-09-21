@@ -1,0 +1,7 @@
+repo,size_mb,reason
+langchainjs,686,too large
+langsmith-docs,850,too large
+langgraph,514,too large
+langchain-api-docs-html,4047,too large
+docs,1084,too large
+deepagents,312,too large
