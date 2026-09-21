@@ -1,15 +1,15 @@
 10 tunnetuinta open source projektia
 
 1. linux kernel https://github.com/torvalds/linux
-2. react  https://github.com/react  tehty ai aloitus jan 24, 2026
-3. kubernetes https://github.com/kubernetes tehty ai aloitus May 9, 2026
-4. VS code  https://github.com/microsoft/vscode ai aloitus Oct 26, 2025
-5. TensorFlow https://github.com/tensorflow
+2. react  https://github.com/react  tehty    ai aloitus jan 24, 2026
+3. kubernetes https://github.com/kubernetes  tehty     ai aloitus May 9, 2026
+4. VS code  https://github.com/microsoft/vscode        ai aloitus Oct 26, 2025
+5. TensorFlow https://github.com/tensorflow  tehty
 6. node.js https://github.com/nodejs
 7. Rust https://github.com/rust-lang ai aloitus Aug 12 2026
 8. Transformers https://github.com/huggingface/transformers
 9. Go https://github.com/golang
-10. FreeCodeCamp https://github.com/freeCodeCamp tehty  ai aloitus jan 27, 2026
+10. FreeCodeCamp https://github.com/freeCodeCamp tehty       ai aloitus jan 27, 2026
 
 10 tunnetuinta open source projektia jotka käyttävät tekoälyä
 

@@ -1,0 +1,8 @@
+repo,size_kb,size_mb,reason
+node,1604640,1567,too large to clone (>50MB threshold)
+nodejs.org,124097,121,too large to clone (>50MB threshold)
+abi-stable-node,239545,233,too large to clone (>50MB threshold)
+node-v8,1345577,1314,too large to clone (>50MB threshold)
+node-auto-test,1333421,1302,too large to clone (>50MB threshold)
+corepack,1005967,982,too large to clone (>50MB threshold)
+amaro,153234,149,too large to clone (>50MB threshold)
