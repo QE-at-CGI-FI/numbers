@@ -1,7 +1,7 @@
 10 tunnetuinta open source projektia
 
 1. linux kernel https://github.com/torvalds/linux
-2. react  https://github.com/react  ai aloitus jan 24, 2026
+2. react  https://github.com/react  tehty ai aloitus jan 24, 2026
 3. kubernetes https://github.com/kubernetes ai aloitus May 9, 2026
 4. VS code  https://github.com/microsoft/vscode ai aloitus Oct 26, 2025
 5. TensorFlow https://github.com/tensorflow
@@ -27,8 +27,8 @@
 
 10 tunnetua projektia jotka eivät ole ai työkaluja mutta käyttävät ai ta tekemisessä
 
-1. selenium
-2. prestashop
+1. selenium https://github.com/SeleniumHQ
+2. prestashop https://github.com/PrestaShop
 3. ghostty  https://github.com/ghostty-org/ghostty
 4. bun  https://github.com/oven-sh/bun
 5. ladybird  https://github.com/LadybirdBrowser/ladybird
