@@ -1,0 +1,4 @@
+month,repos,commits,insertions,deletions,total_msg_chars,avg_insertions,avg_deletions,avg_msg_length
+2023-09,1,36,626,216,2020,17.4,6.0,56.1
+2023-10,1,109,719,369,5823,6.6,3.4,53.4
+2023-11,1,2,162,1,161,81.0,0.5,80.5

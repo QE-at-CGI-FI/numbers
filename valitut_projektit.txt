@@ -8,7 +8,7 @@
 6. node.js https://github.com/nodejs  tehty
 7. Rust https://github.com/rust-lang  tehty          ai aloitus Aug 12 2026
 8. Transformers https://github.com/huggingface/transformers
-9. Go https://github.com/golang
+9. Go https://github.com/golang   tehty
 10. FreeCodeCamp https://github.com/freeCodeCamp tehty       ai aloitus jan 27, 2026
 
 10 tunnetuinta open source projektia jotka käyttävät tekoälyä
@@ -27,11 +27,11 @@
 
 10 tunnetua projektia jotka eivät ole ai työkaluja mutta käyttävät ai ta tekemisessä
 
-1. selenium https://github.com/SeleniumHQ
-2. prestashop https://github.com/PrestaShop
-3. ghostty  https://github.com/ghostty-org/ghostty
-4. bun  https://github.com/oven-sh/bun
-5. ladybird  https://github.com/LadybirdBrowser/ladybird
+1. selenium https://github.com/SeleniumHQ    tehty   ai aloitus Jan 19,2026
+2. prestashop https://github.com/PrestaShop  tehty   ai aloitus Apr 8,2026
+3. ghostty  https://github.com/ghostty-org/ghostty     ai aloitus Sep 4,2025
+4. bun  https://github.com/oven-sh/bun    ai aloitus  Jun 25,2025
+5. ladybird  https://github.com/LadybirdBrowser/ladybird    ai aloitus Feb 24,2026
 6. curl  curl — https://github.com/curl/curl
 7. redis  Redis — https://github.com/redis/redis
 8. gitlab  https://gitlab.com/gitlab-org/gitlab
