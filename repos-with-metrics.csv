@@ -2912,3 +2912,14 @@ getsentry,hackweek-metrics-exporter-statsd,https://github.com/getsentry/hackweek
 getsentry,sentry-data-schemas,https://github.com/getsentry/sentry-data-schemas,,side
 getsentry,sentry-kotlin-multiplatform,https://github.com/getsentry/sentry-kotlin-multiplatform,,side
 getsentry,action-github-app-token,https://github.com/getsentry/action-github-app-token,,side
+getsentry,sentry-api-schema,https://github.com/getsentry/sentry-api-schema,,side
+getsentry,action-html-to-image,https://github.com/getsentry/action-html-to-image,,side
+getsentry,utf16string,https://github.com/getsentry/utf16string,,side
+getsentry,publish,https://github.com/getsentry/publish,,side
+getsentry,sentry-capacitor,https://github.com/getsentry/sentry-capacitor,,side
+getsentry,next-source-maps,https://github.com/getsentry/next-source-maps,,side
+getsentry,bootstrap-sentry,https://github.com/getsentry/bootstrap-sentry,,side
+getsentry,prism-sentry,https://github.com/getsentry/prism-sentry,,side
+getsentry,action-git-diff-suggestions,https://github.com/getsentry/action-git-diff-suggestions,,side
+getsentry,action-prepare-release,https://github.com/getsentry/action-prepare-release,,side
+getsentry,sentry-visualstudio,https://github.com/getsentry/sentry-visualstudio,,side
