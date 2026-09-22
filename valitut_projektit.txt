@@ -31,7 +31,7 @@
 2. prestashop https://github.com/PrestaShop  tehty   ai aloitus Apr 8,2026
 3. ghostty  https://github.com/ghostty-org/ghostty tehty    ai aloitus Sep 4,2025
 4. bun  https://github.com/oven-sh/bun    ai aloitus  Jun 25,2025
-5. ladybird  https://github.com/LadybirdBrowser/ladybird tehty   ai aloitus Feb 24,2026
+5. ladybird  https://github.com/LadybirdBrowser/ladybird tehty   ai aloitus Feb 24,2026   [NEEDS RECONCILIATION: no .claude/.cursor/CLAUDE.md/AGENTS.md/.github skills-agents-copilot marker found anywhere in repo history]
 6. curl  curl — https://github.com/curl/curl
 7. redis  Redis — https://github.com/redis/redis
 8. gitlab  https://gitlab.com/gitlab-org/gitlab
