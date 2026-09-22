@@ -103,11 +103,32 @@ misses markers that were later removed or renamed.
 
 ### Scope
 
-`ai_adoption_date` is currently only populated for the **flagship repo per
-org** (the main product repo, e.g. `kubernetes/kubernetes`, `rust-lang/rust`,
-`react/react` — 13 rows total), not all ~995 rows in
-`repos-with-metrics.csv`. Extending it to every repo means thousands of API
-calls; confirm scope with the user before doing that.
+`ai_adoption_date` is populated for the 13 `repo_type=main` rows in full, and
+is in progress for the 982 `repo_type=side` rows (as of 2026-09-22, 240/982
+side repos checked — see "Resuming the side-repo lookup" below).
+
+### Resuming the side-repo lookup
+
+`scripts/ai_adoption_all.py` checks every `repo_type=side` row in
+`repos-with-metrics.csv` against the 7 markers above and writes results to
+`scripts/ai_adoption_progress_all.json` (one entry per `org/repo`, marked
+`"_complete": true` once all 7 markers are checked for that repo — the
+script skips complete entries on rerun, so it's safe to stop and restart).
+
+To continue:
+
+```
+export GH_TOKEN=$(gh auth token)   # requires `gh auth status` to be logged in
+python3 scripts/ai_adoption_all.py
+```
+
+It stops itself gracefully (saving progress) when the GitHub rate limit runs
+low, so it may need to be re-run more than once, roughly an hour apart, to
+finish all 982 repos. After a run, merge newly-completed entries back into
+`repos-with-metrics.csv`'s `ai_adoption_date` column by taking, per repo, the
+minimum date across all markers with a hit in
+`scripts/ai_adoption_progress_all.json` (leave blank if none hit) — there is
+no standing merge script for this yet, write one inline when needed.
 
 ## Reconciliation
 
