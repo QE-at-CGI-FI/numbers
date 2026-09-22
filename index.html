@@ -197,6 +197,11 @@
       gap: 10px;
       padding: 10px 10px 10px 14px;
     }
+    /* Active-authors row only appears when the loaded CSV has that column —
+       without it, the grid stays exactly the original 3×3 layout. */
+    .charts-pane.has-authors { grid-template-rows: repeat(4, 1fr); }
+    #authorsCard { display: none; }
+    .charts-pane.has-authors #authorsCard { display: flex; }
 
     .chart-card {
       background: var(--white);
@@ -542,6 +547,11 @@
       <div class="chart-wrap"><canvas id="churnChart"></canvas></div>
     </div>
 
+    <div class="chart-card span3" id="authorsCard">
+      <h2 class="purple">Active Authors per Month</h2>
+      <div class="chart-wrap"><canvas id="authorsChart"></canvas></div>
+    </div>
+
   </div>
 
   <!-- Notes sidebar -->
@@ -655,12 +665,31 @@ function fmt(n) {
   return Math.round(n).toString();
 }
 
+function hasActiveAuthors(rows) {
+  return rows.some(r => r.active_authors !== undefined && !isNaN(r.active_authors));
+}
+
 function renderKPIs(rows) {
   const totalCommits = rows.reduce((s,r) => s + r.commits, 0);
   const totalIns     = rows.reduce((s,r) => s + r.insertions, 0);
   const totalDel     = rows.reduce((s,r) => s + r.deletions, 0);
   const avgMsg       = (rows.reduce((s,r) => s + r.avg_msg_length, 0) / rows.length).toFixed(1);
   const peakRow      = rows.reduce((b,r) => r.commits > b.commits ? r : b, rows[0]);
+
+  // Active authors is an optional column — older CSVs simply won't have it,
+  // in which case this KPI card is skipped rather than shown as broken/NaN.
+  let authorsKpi = '';
+  if (hasActiveAuthors(rows)) {
+    const authorRows = rows.filter(r => r.active_authors !== undefined && !isNaN(r.active_authors));
+    const avgAuthors  = authorRows.reduce((s,r) => s + r.active_authors, 0) / authorRows.length;
+    const peakAuthors = authorRows.reduce((b,r) => r.active_authors > b.active_authors ? r : b, authorRows[0]);
+    authorsKpi = `
+    <div class="kpi-card purple">
+      <div class="kpi-label">Active Authors</div>
+      <div class="kpi-value">${avgAuthors.toFixed(1)}</div>
+      <div class="kpi-sub">avg/mo · peak ${peakAuthors.active_authors} (${peakAuthors.month})</div>
+    </div>`;
+  }
 
   document.getElementById('kpiStrip').innerHTML = `
     <div class="kpi-card">
@@ -688,6 +717,7 @@ function renderKPIs(rows) {
       <div class="kpi-value">${peakRow ? peakRow.commits : '–'}</div>
       <div class="kpi-sub">${peakRow ? peakRow.month : ''}</div>
     </div>
+    ${authorsKpi}
   `;
 }
 
@@ -781,6 +811,23 @@ function render() {
       borderColor: RED2, backgroundColor: RED2+'22', fill: true, tension: 0.35, pointRadius: 2, borderWidth: 2 },
   ]}, { ...baseOpts, plugins: { ...baseOpts.plugins, ...aiAnnotation(labels), tooltip: { callbacks: { label: c => ` ${(c.parsed.y*100).toFixed(1)}% churn` } } },
     scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { maxTicksLimit: 5, callback: v => (v*100).toFixed(0)+'%' } } } });
+
+  // 6. Active authors per month — optional column. When the loaded CSV
+  // doesn't have it, hide the row entirely and tear down any stale chart
+  // from a previously-loaded CSV that did have it.
+  const authorsAvailable = hasActiveAuthors(rows);
+  document.querySelector('.charts-pane').classList.toggle('has-authors', authorsAvailable);
+  if (authorsAvailable) {
+    makeOrUpdate('authorsChart', 'bar', {
+      labels,
+      datasets: [{ label: 'Active Authors', data: rows.map(r => r.active_authors ?? null),
+        backgroundColor: PURPLE + '99', borderColor: PURPLE, borderWidth: 1, borderRadius: 3 }]
+    }, { ...baseOpts, plugins: { ...baseOpts.plugins, ...aiAnnotation(labels),
+      tooltip: { callbacks: { label: c => ` ${c.parsed.y} author${c.parsed.y === 1 ? '' : 's'}` } } } });
+  } else if (charts['authorsChart']) {
+    charts['authorsChart'].destroy();
+    delete charts['authorsChart'];
+  }
 
   // Sync range display
   if (rows.length) {

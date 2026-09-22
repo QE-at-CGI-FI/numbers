@@ -3,7 +3,7 @@
 git_metrics.py — collect monthly git activity metrics from one or more local
 repositories and write them to a CSV in the same shape as:
 
-    month,repos,commits,insertions,deletions,total_msg_chars,avg_insertions,avg_deletions,avg_msg_length
+    month,repos,commits,insertions,deletions,total_msg_chars,avg_insertions,avg_deletions,avg_msg_length,active_authors
 
 Usage
 -----
@@ -28,6 +28,9 @@ Notes
   across all repos for that month.
 - avg_insertions / avg_deletions / avg_msg_length are per-commit averages
   for that month, rounded to 1 decimal place.
+- active_authors is the count of distinct commit-author names seen that
+  month, unioned across all repos passed in (so the same author committing
+  to two repos in one month still counts once).
 - Merge commits normally report no diffstat from `git log --shortstat`
   (that's git's default behaviour), so they count toward "commits" but
   contribute 0 insertions/deletions unless you pass --include-merges-diff,
@@ -159,14 +162,15 @@ def collect_repo_metrics(repo, all_branches, author, include_merges_diff):
     messages = collect_messages(repo, all_branches, author)
     stats = collect_stats(repo, all_branches, author, include_merges_diff)
 
-    per_month = defaultdict(lambda: {"commits": 0, "insertions": 0, "deletions": 0, "msg_chars": 0})
-    for commit_hash, (month, msg_len, _author_name) in messages.items():
+    per_month = defaultdict(lambda: {"commits": 0, "insertions": 0, "deletions": 0, "msg_chars": 0, "authors": set()})
+    for commit_hash, (month, msg_len, author_name) in messages.items():
         ins, dels = stats.get(commit_hash, (0, 0))
         bucket = per_month[month]
         bucket["commits"] += 1
         bucket["insertions"] += ins
         bucket["deletions"] += dels
         bucket["msg_chars"] += msg_len
+        bucket["authors"].add(author_name)
     return per_month
 
 
@@ -201,8 +205,8 @@ def main():
     for r in repos:
         print(f"  - {r}", file=sys.stderr)
 
-    # month -> {"repos": set(), "commits":, "insertions":, "deletions":, "msg_chars":}
-    combined = defaultdict(lambda: {"repos": set(), "commits": 0, "insertions": 0, "deletions": 0, "msg_chars": 0})
+    # month -> {"repos": set(), "authors": set(), "commits":, "insertions":, "deletions":, "msg_chars":}
+    combined = defaultdict(lambda: {"repos": set(), "authors": set(), "commits": 0, "insertions": 0, "deletions": 0, "msg_chars": 0})
 
     for repo in repos:
         try:
@@ -214,6 +218,7 @@ def main():
         for month, bucket in per_month.items():
             c = combined[month]
             c["repos"].add(repo)
+            c["authors"] |= bucket["authors"]
             c["commits"] += bucket["commits"]
             c["insertions"] += bucket["insertions"]
             c["deletions"] += bucket["deletions"]
@@ -236,6 +241,7 @@ def main():
             avg_ins,
             avg_del,
             avg_msg,
+            len(c["authors"]),
         ])
 
     with open(args.output, "w", newline="") as f:
@@ -243,6 +249,7 @@ def main():
         writer.writerow([
             "month", "repos", "commits", "insertions", "deletions",
             "total_msg_chars", "avg_insertions", "avg_deletions", "avg_msg_length",
+            "active_authors",
         ])
         writer.writerows(rows)
 

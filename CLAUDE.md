@@ -32,7 +32,11 @@ python3 repo_month_metrics.py /path/to/local/clone -o <OrgFolder>/<repo>.csv
 ```
 
 - Output columns: `month, repos, commits, insertions, deletions,
-  total_msg_chars, avg_insertions, avg_deletions, avg_msg_length`.
+  total_msg_chars, avg_insertions, avg_deletions, avg_msg_length,
+  active_authors` (distinct commit-author names that month).
+  `active_authors` was added later — existing per-repo CSVs still on the
+  9-column schema keep working fine (index.html treats the column as
+  optional); rerun a repo through the script to backfill it.
 - `--scan DIR` auto-discovers git repos one level under `DIR` instead of
   taking explicit paths; add `--scan-recursive` to search deeper.
 - `--all-branches` includes every branch, not just the checked-out one.

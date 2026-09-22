@@ -1,0 +1,145 @@
+If these are the outputs, what are the inputs?
+
+- how many people are contributing?
+  -> deeper version: not just a headcount but concentration — % of a
+     month's commits from the single most active author, or a
+     Gini/Lorenz-style split (top-1, top-5 vs everyone else). "12 people
+     contributed" reads very differently if 1 person made 90% of commits.
+     Computable from `git shortlog -sn --since --until` per month.
+  -> contributor churn: how many of this month's authors are new (first
+     commit ever) vs returning. Signals whether a project is growing its
+     base or running on the same core group. Needs first-commit-date per
+     author, once, then a monthly diff against that.
+
+- how much time do they have available for contributing?
+  -> separate systems to collect this
+
+If these are the outputs from one angle, what other angles are there?
+
+- what is the size of the codebase?
+  -> line count (`git ls-files | xargs wc -l`, or cloc) at a point in time
+     per month, walked via `git log --since --until -1` to get the commit
+     at month-end, then `git show <rev>:<path>` or a full checkout at that
+     rev. cloc is worth using over a raw wc -l since it already splits
+     code/comment/blank.
+  -> distinct from `insertions - deletions` (net_lines, already available
+     via generate_aggregate.py) because net_lines is a *flow* number and
+     this is a *stock* number — a repo can have huge churn and flat size,
+     or the reverse.
+
+- what the codebase consists of, proportionally (code, infra code, test
+  code, documentation)?
+  -> cloc's `--by-file` or a simple extension/path bucketing does most of
+     this: `*.md`, `/docs/`, `/test/` or `*_test.*`/`*.spec.*`,
+     `.github/`, `Dockerfile`/`*.tf`/`*.yaml` as infra, everything else as
+     "code". Run at the same month-end revs as the size number above to
+     get a trend, not just a snapshot.
+  -> ties into AI-adoption tracking in CLAUDE.md: a jump in the infra/config
+     share right around `.github/skills` or `.claude` first appearing would
+     be a nice corroborating signal.
+
+- is change happening to a recent set of lines, introducing new lines, or
+  to an older set of lines?
+  -> "code age at time of edit": for each changed line in a commit, how
+     long had that line existed before this edit touched it. Expensive to
+     do exactly (needs `git log -L` or `git blame` per hunk), so a cheaper
+     monthly proxy: for each file touched this month, was it *also*
+     touched in the trailing 3 months (recent churn) or not (stable code
+     being reopened)? Splits commits into "iterating on recent work" vs
+     "touching legacy code" vs "net-new files".
+  -> related: % of a month's insertions that land in files that didn't
+     exist before that month (pure new-file growth vs editing existing
+     files).
+
+- what commits consist of: chore, bug, feature?
+  -> Conventional Commits prefixes (`feat:`, `fix:`, `chore:`, `docs:`,
+     `refactor:`, `test:`) parse straight out of the commit message
+     subject line where a project uses that convention — not universal,
+     but several repos in this set do. Where it's not used, a fallback
+     keyword classifier on the subject (fix/bug/patch -> bug,
+     add/introduce/support -> feature, etc.) is noisier but still a
+     starting point.
+  -> we already collect `total_msg_chars`/`avg_msg_length` but not the
+     message text itself, so this needs a separate pass that reads
+     `git log --format=%s` rather than just message length.
+
+- new angle: AI-assisted commits, as a rate rather than a single date
+  -> CLAUDE.md's ai_adoption_date is a one-time "first marker file
+     appeared" signal. A complementary, ongoing signal: commit trailers
+     like `Co-Authored-By: Claude <...>` (or other bot/assistant
+     trailers) let you count *what fraction of commits each month* were
+     AI-assisted, not just when adoption started. `git log --format=%b`
+     grepped for `Co-Authored-By:.*\b(claude|copilot|codex|cursor)\b`
+     (case-insensitive) would do it. Turns adoption from a step function
+     into a trend line — does AI-assisted share grow, plateau, or drop
+     off after the initial marker commit?
+
+- new angle: review/collaboration shape
+  -> merge commit ratio (merges / total commits) as a rough proxy for
+     "how much of this goes through PR review vs direct pushes to the
+     tracked branch." We already exclude merges from diff stats by
+     default (`--include-merges-diff` opts in), but we don't currently
+     count how many there were.
+  -> average files changed per commit (already scriptable via
+     generate_aggregate.py's `avg_files_per_commit`) as a rough proxy for
+     commit granularity/discipline — small focused commits vs sprawling
+     ones.
+
+## Non-Git
+
+Non-git-derived numbers (apply to OSS + corporate, bias toward corporate —
+these are the systems most OSS repos in this set won't expose, but a company
+tracking its own repos will have):
+
+- AI tool telemetry, direct — Copilot Business / Cursor / Claude Code admin
+  dashboards report suggestion-shown vs suggestion-accepted rates, % of
+  committed lines that trace to an accepted suggestion, active-seat vs
+  licensed-seat counts. This is the most direct fingerprint there is — git
+  history only shows the *outcome*, this shows the *offer/accept* loop
+  behind it. OSS repos essentially never expose this; corporate orgs
+  usually can pull it per-team.
+- issue tracker (Jira/Linear/GitHub Issues) — cycle time (open->in
+  progress->done), lead time, throughput, bug/feature ratio at the ticket
+  level instead of guessed from commit message prefixes. More reliable
+  than the Conventional-Commits guess above, corporate-only in practice.
+- PR/review metadata beyond git — time-to-first-review, review comment
+  count, approvals, review-comments-per-line-changed. Hypothesis worth
+  testing: does review depth per line drop as AI-assisted share rises
+  (more code, same review attention)?
+- CI/CD — build frequency, pass/fail rate, deploy frequency, change
+  failure rate, MTTR (the DORA four keys). Corporate-heavy; OSS repos with
+  GitHub Actions expose some of this via the Actions API, but deploy
+  frequency usually isn't visible externally.
+- static analysis / code quality trend — complexity, duplication,
+  lint-debt over time (SonarQube etc.). Another fingerprint hypothesis:
+  AI-assisted code may show a distinct complexity or duplication
+  signature vs hand-written.
+- security scanning — SAST/dependency vuln counts over time, again as a
+  before/after-adoption comparison.
+- incident/on-call data — production incidents, postmortem count,
+  page volume. Tests whether AI-assisted velocity trades off against
+  reliability.
+- self-report / pulse survey (SPACE / DX-style) — "did you use AI for
+  this", perceived productivity, trust. Weakest data quality but the only
+  source that captures *intent*, which none of the behavioral signals
+  above do on their own.
+- HR/calendar systems — this is the "separate systems" answer to "how
+  much time do they have available": meeting load, focus-time %, tenure,
+  seniority mix, onboarding time for new hires. Corporate-only.
+
+On visualizing the AI fingerprint: no single number above says "AI did
+this" — each is a proxy, and most proxies have a plausible non-AI
+explanation too. The fingerprint is a shape across several axes at once,
+checked for whether they all bend around the same date (the
+ai_adoption_date marker, or the Co-Authored-By trend from above):
+  - velocity: commits/insertions per author per month
+  - style: message length, diff shape (insertions:deletions ratio),
+    file-touch breadth per commit
+  - review depth: comments/approvals per line (non-git)
+  - quality/risk: defect or incident rate, complexity trend (non-git)
+  - confirmed intent: Copilot/Cursor/Claude acceptance rate or survey
+    self-report (non-git)
+A visualization worth building: small multiples, one sparkline per axis
+per repo, all sharing a time axis, with the adoption date marked as a
+vertical line — the fingerprint is whichever axes visibly kink at that
+line vs drift on their own schedule.
