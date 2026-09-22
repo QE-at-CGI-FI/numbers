@@ -60,6 +60,7 @@
     display: flex;
     align-items: center;
     padding: 0 20px;
+    gap: 14px;
   }
   .toolbar label {
     font-size: 0.72rem;
@@ -67,7 +68,30 @@
     color: var(--gray-500);
     text-transform: uppercase;
     letter-spacing: 0.06em;
+    white-space: nowrap;
   }
+  .toolbar-sep { width: 1px; height: 20px; background: var(--gray-200); }
+
+  .filter-tabs { display: flex; gap: 4px; }
+  .filter-tab {
+    border: 1.5px solid var(--gray-200);
+    border-radius: 3px;
+    padding: 4px 10px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    background: var(--gray-50);
+    color: var(--gray-500);
+    transition: all 0.15s;
+  }
+  .filter-tab:hover { background: var(--gray-200); }
+  .filter-tab.active { color: var(--white); }
+  .filter-tab.active[data-cat="all"]        { background: var(--gray-900); border-color: var(--gray-900); }
+  .filter-tab.active[data-cat="general"]    { background: var(--cgi-red); border-color: var(--cgi-red); }
+  .filter-tab.active[data-cat="ai-tool"]    { background: var(--cgi-purple); border-color: var(--cgi-purple); }
+  .filter-tab.active[data-cat="non-ai-tool"]{ background: var(--gray-500); border-color: var(--gray-500); }
 
   main {
     padding: 20px;
@@ -118,8 +142,18 @@
     width: 8px;
     height: 8px;
     border-radius: 2px;
-    background: var(--cgi-red);
+    background: var(--cat-color, var(--cgi-red));
     flex-shrink: 0;
+  }
+  .shot-category {
+    font-size: 0.6rem;
+    color: var(--cat-color, var(--gray-400));
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: auto;
+    white-space: nowrap;
+    padding-left: 8px;
   }
   .shot-org {
     font-size: 0.65rem;
@@ -218,6 +252,14 @@
 
 <div class="toolbar">
   <label id="countLabel">Loading…</label>
+  <div class="toolbar-sep"></div>
+  <label>Category</label>
+  <div class="filter-tabs" id="filterTabs">
+    <button class="filter-tab active" data-cat="all">All</button>
+    <button class="filter-tab" data-cat="general">Top 10 OSS</button>
+    <button class="filter-tab" data-cat="ai-tool">AI Tool Projects</button>
+    <button class="filter-tab" data-cat="non-ai-tool">AI-Assisted Dev</button>
+  </div>
 </div>
 
 <main>
@@ -282,32 +324,79 @@ const SHOTS = [
   "rust-lang-rust.png"
 ];
 
+// ── Category split, from valitut_projektit.txt ──────────────────────────────
+// List 1 "10 tunnetuinta open source projektia"                          → general
+// List 2 "...jotka käyttävät tekoälyä" (AI tool projects)                → ai-tool
+// List 3 "...eivät ole ai työkaluja mutta käyttävät ai ta tekemisessä"   → non-ai-tool
+const CATEGORY_META = {
+  'general':     { label: 'Top 10 OSS',        color: 'var(--cgi-red)' },
+  'ai-tool':     { label: 'AI Tool Project',    color: 'var(--cgi-purple)' },
+  'non-ai-tool': { label: 'AI-Assisted Dev',    color: 'var(--gray-500)' },
+};
+const ORG_CATEGORY = {
+  'react':        'general',
+  'kubernetes':   'general',
+  'freeCodeCamp': 'general',
+  'rust-lang':    'general',
+  'nodejs':       'general',
+  'anthropics':   'ai-tool',
+  'langchain-ai': 'ai-tool',
+  'SeleniumHQ':      'non-ai-tool',
+  'PrestaShop':      'non-ai-tool',
+  'ghostty-org':     'non-ai-tool',
+};
+
 function parseShot(file) {
   const name = file.replace(/\.png$/, '');
   const idx = name.indexOf('-');
-  return { org: name.slice(0, idx), repo: name.slice(idx + 1), file };
+  const org = name.slice(0, idx);
+  const repo = name.slice(idx + 1);
+  return { org, repo, file, category: ORG_CATEGORY[org] || 'general' };
 }
 
 const shots = SHOTS.map(parseShot).sort((a, b) => a.repo.localeCompare(b.repo, undefined, { sensitivity: 'base' }));
+let activeCategory = 'all';
+let visible = shots;
 let current = 0;
 
 const gallery = document.getElementById('gallery');
-document.getElementById('countLabel').textContent = shots.length + ' repos with AI adoption date';
+const countLabel = document.getElementById('countLabel');
 
-shots.forEach((s, i) => {
-  const card = document.createElement('div');
-  card.className = 'shot-card';
-  card.innerHTML = `
-    <img class="shot-thumb" src="screenshots/${s.file}" alt="${s.org}/${s.repo}" loading="lazy">
-    <div class="shot-label">
-      <div>
-        <span class="shot-org">${s.org}</span>
-        <span class="shot-repo">${s.repo}</span>
-      </div>
-    </div>`;
-  card.addEventListener('click', () => openLightbox(i));
-  gallery.appendChild(card);
+function renderGallery() {
+  visible = activeCategory === 'all' ? shots : shots.filter(s => s.category === activeCategory);
+  countLabel.textContent = activeCategory === 'all'
+    ? shots.length + ' repos with AI adoption date'
+    : visible.length + ' of ' + shots.length + ' repos';
+
+  gallery.innerHTML = '';
+  visible.forEach((s, i) => {
+    const meta = CATEGORY_META[s.category];
+    const card = document.createElement('div');
+    card.className = 'shot-card';
+    card.style.setProperty('--cat-color', meta.color);
+    card.innerHTML = `
+      <img class="shot-thumb" src="screenshots/${s.file}" alt="${s.org}/${s.repo}" loading="lazy">
+      <div class="shot-label">
+        <div>
+          <span class="shot-org">${s.org}</span>
+          <span class="shot-repo">${s.repo}</span>
+        </div>
+        <span class="shot-category">${meta.label}</span>
+      </div>`;
+    card.addEventListener('click', () => openLightbox(i));
+    gallery.appendChild(card);
+  });
+}
+
+document.getElementById('filterTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.filter-tab');
+  if (!btn) return;
+  activeCategory = btn.dataset.cat;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.toggle('active', b === btn));
+  renderGallery();
 });
+
+renderGallery();
 
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
@@ -315,17 +404,17 @@ const lightboxCaption = document.getElementById('lightboxCaption');
 
 function openLightbox(i) {
   current = i;
-  render();
+  renderLightbox();
   lightbox.classList.add('show');
 }
 function closeLightbox() { lightbox.classList.remove('show'); }
-function render() {
-  const s = shots[current];
+function renderLightbox() {
+  const s = visible[current];
   lightboxImg.src = 'screenshots/' + s.file;
-  lightboxCaption.textContent = s.org + ' / ' + s.repo;
+  lightboxCaption.textContent = s.org + ' / ' + s.repo + '  ·  ' + CATEGORY_META[s.category].label;
 }
-function next() { current = (current + 1) % shots.length; render(); }
-function prev() { current = (current - 1 + shots.length) % shots.length; render(); }
+function next() { current = (current + 1) % visible.length; renderLightbox(); }
+function prev() { current = (current - 1 + visible.length) % visible.length; renderLightbox(); }
 
 document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
 document.getElementById('lightboxNext').addEventListener('click', next);
