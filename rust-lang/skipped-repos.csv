@@ -1,8 +1,1 @@
 repo,size_kb,size_mb,reason
-rust-repos,1370094,1337,too large to clone (>50MB threshold)
-llvm-project,3631683,3546,too large to clone (>50MB threshold)
-zulip_archive,120458,117,too large to clone (>50MB threshold)
-gcc,3854224,3763,too large to clone (>50MB threshold)
-crates.io-index-archive,9720554,9492,too large to clone (>50MB threshold)
-enzyme,113273,110,too large to clone (>50MB threshold)
-all-hands-2026,51467,50,too large to clone (>50MB threshold)
