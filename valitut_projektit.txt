@@ -34,7 +34,7 @@
 *5. ladybird  https://github.com/LadybirdBrowser/ladybird tehty      
 *6. curl  curl — https://github.com/curl  tehty
 *7. redis  Redis — https://github.com/redis  tehty
-8. gitlab  https://github.com/gitlabhq
+*8. gitlab  https://github.com/gitlabhq  tehty
 *9. chromium  https://github.com/chromium  tehty
 10.sentry  https://github.com/getsentry
 

@@ -2710,3 +2710,7 @@ gitlabhq,cli,https://github.com/gitlabhq/cli,,side
 gitlabhq,omnibus-gitlab,https://github.com/gitlabhq/omnibus-gitlab,,side
 gitlabhq,orbit-knowledge-graph,https://github.com/gitlabhq/orbit-knowledge-graph,,side
 gitlabhq,gitlab-runner,https://github.com/gitlabhq/gitlab-runner,,side
+getsentry,raven-python,https://github.com/getsentry/raven-python,,side
+getsentry,raven-node,https://github.com/getsentry/raven-node,,side
+getsentry,sentry-phabricator,https://github.com/getsentry/sentry-phabricator,,side
+getsentry,sentry-php,https://github.com/getsentry/sentry-php,,side
