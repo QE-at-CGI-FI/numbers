@@ -1,0 +1,4 @@
+month,repos,commits,insertions,deletions,total_msg_chars,avg_insertions,avg_deletions,avg_msg_length
+2017-07,1,5,227,3,149,45.4,0.6,29.8
+2018-01,1,1,1,1,39,1.0,1.0,39.0
+2019-10,1,1,1,1,24,1.0,1.0,24.0

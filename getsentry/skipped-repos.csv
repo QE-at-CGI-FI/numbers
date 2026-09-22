@@ -1,1 +1,8 @@
 repo,size_kb,size_mb,reason
+sentry-docs,729380,712.3,too large to clone/process (0.7 GB)
+test-repo,0,0.0,empty repository - no commit history
+demo-sinatra,0,0.0,empty repository - no commit history
+demo-flask,0,0.0,empty repository - no commit history
+sentry-fastlane-plugin,1370564,1338.4,too large to clone/process (1.31 GB)
+demo-rq,0,0.0,empty repository - no commit history
+relay,778292,760.1,too large to clone/process (0.74 GB)
