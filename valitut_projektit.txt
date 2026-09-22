@@ -30,9 +30,9 @@
 1. selenium https://github.com/SeleniumHQ    tehty   ai aloitus Jan 19,2026
 2. prestashop https://github.com/PrestaShop  tehty   ai aloitus Apr 8,2026
 3. ghostty  https://github.com/ghostty-org/ghostty tehty    ai aloitus Sep 4,2025
-4. bun  https://github.com/oven-sh/bun    ai aloitus  Jun 25,2025
+4. bun  https://github.com/oven-sh/bun  tehty  ai aloitus  Jun 25,2025
 5. ladybird  https://github.com/LadybirdBrowser/ladybird tehty      
-6. curl  curl — https://github.com/curl/curl
+6. curl  curl — https://github.com/curl
 7. redis  Redis — https://github.com/redis/redis
 8. gitlab  https://gitlab.com/gitlab-org/gitlab
 9. chromium  https://chromium.googlesource.com/chromium/src

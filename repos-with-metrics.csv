@@ -994,3 +994,4 @@ tensorflow,tfx-bsl,https://github.com/tensorflow/tfx-bsl,,side
 tensorflow,tfx,https://github.com/tensorflow/tfx,,side
 tensorflow,tpu,https://github.com/tensorflow/tpu,,side
 tensorflow,transform,https://github.com/tensorflow/transform,,side
+curl,curl,https://github.com/curl/curl,,main
