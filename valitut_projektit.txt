@@ -33,7 +33,7 @@
 *4. bun  https://github.com/oven-sh/bun  tehty  ai aloitus  Jun 25,2025
 *5. ladybird  https://github.com/LadybirdBrowser/ladybird tehty      
 *6. curl  curl — https://github.com/curl  tehty
-7. redis  Redis — https://github.com/redis
+*7. redis  Redis — https://github.com/redis  tehty
 8. gitlab  https://github.com/gitlabhq
 9. chromium  https://github.com/chromium
 10.sentry  https://github.com/getsentry
