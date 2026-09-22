@@ -1,2 +1,30 @@
 repo,size_kb,size_mb,reason
-gitlabhq,2863220,2796.5,repeated clone failures over HTTPS (connection reset / early EOF) - too large to reliably clone
+gitlabhq,2865536,2798.4,repeated clone failures over HTTPS (connection reset / early EOF) - too large to reliably clone
+zap-baseline,27,0.0,fork of an external repo - not original gitlabhq org history
+gitlab-hook,92,0.1,fork of an external repo - not original gitlabhq org history
+grack,99,0.1,fork of an external repo - not original gitlabhq org history
+jquery-mentions-input,117,0.1,fork of an external repo - not original gitlabhq org history
+default_value_for,133,0.1,fork of an external repo - not original gitlabhq org history
+yaml_db,158,0.2,fork of an external repo - not original gitlabhq org history
+gitolite-client,169,0.2,fork of an external repo - not original gitlabhq org history
+grit_ext,175,0.2,fork of an external repo - not original gitlabhq org history
+go-gssapi,186,0.2,fork of an external repo - not original gitlabhq org history
+peek,224,0.2,fork of an external repo - not original gitlabhq org history
+markup,234,0.2,fork of an external repo - not original gitlabhq org history
+mysql-postgresql-converter,240,0.2,fork of an external repo - not original gitlabhq org history
+coffeescript-style-guide,252,0.2,fork of an external repo - not original gitlabhq org history
+em-imap,280,0.3,fork of an external repo - not original gitlabhq org history
+raphael-rails,335,0.3,fork of an external repo - not original gitlabhq org history
+omniauth-ldap,514,0.5,fork of an external repo - not original gitlabhq org history
+gon,739,0.7,fork of an external repo - not original gitlabhq org history
+ruby-style-guide,838,0.8,fork of an external repo - not original gitlabhq org history
+gitlab-contributors,1576,1.5,fork of an external repo - not original gitlabhq org history
+rouge,1915,1.9,fork of an external repo - not original gitlabhq org history
+gitlab-cli,2072,2.0,fork of an external repo - not original gitlabhq org history
+gitolite,3776,3.7,fork of an external repo - not original gitlabhq org history
+pygments.rb,5048,4.9,fork of an external repo - not original gitlabhq org history
+linguist,6210,6.1,fork of an external repo - not original gitlabhq org history
+grit,6458,6.3,fork of an external repo - not original gitlabhq org history
+gollum-lib,7488,7.3,fork of an external repo - not original gitlabhq org history
+trello-power-up,0,0.0,empty repository - no commit history
+cursor-gitlab-plugin,0,0.0,empty repository - no commit history
