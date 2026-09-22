@@ -1,0 +1,2 @@
+repo,size_kb,size_mb,reason
+gitlabhq,2863220,2796.5,repeated clone failures over HTTPS (connection reset / early EOF) - too large to reliably clone

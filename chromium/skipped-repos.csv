@@ -1,0 +1,3 @@
+repo,size_kb,size_mb,reason
+chromium,66726916,65163.0,too large to clone/process (~63.6GB) - official Chromium source mirror
+caterpillar,179,0.2,git clone failed (exit 128): and retry with 'git restore --source=HEAD :/'
