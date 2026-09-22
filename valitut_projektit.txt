@@ -34,8 +34,8 @@
 *5. ladybird  https://github.com/LadybirdBrowser/ladybird tehty      
 *6. curl  curl — https://github.com/curl  tehty
 7. redis  Redis — https://github.com/redis/redis
-8. gitlab  https://gitlab.com/gitlab-org/gitlab
+8. gitlab  https://github.com/gitlabhq
 9. chromium  https://github.com/chromium
-10.sentry  https://github.com/getsentry/sentry
+10.sentry  https://github.com/getsentry
 
 joko .github/copilot.mb tai .github/skills tai .github/agents tai .claude tai .cursor
