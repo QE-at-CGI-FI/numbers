@@ -1,0 +1,6 @@
+repo,size_kb,size_mb,reason
+AutoGPT,631025,616.2,too large to clone/process (0.6 GB)
+AutoGPT-ghsa-mvwv,645575,630.4,too large to clone/process (0.6 GB)
+AutoGPT-ghsa-fq82,645575,630.4,too large to clone/process (0.6 GB)
+AutoGPT-ghsa-qrmh,645575,630.4,too large to clone/process (0.6 GB)
+pathfinder,0,0.0,empty repository - no commit history

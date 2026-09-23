@@ -15,7 +15,7 @@
 
 *1. Openclaw https://github.com/openclaw tehty
 *2. TensorFlow https://github.com/tensorflow tehty
-3. Auto gpt https://github.com/Significant-Gravitas
+*3. Auto gpt https://github.com/Significant-Gravitas tehty
 *4. Ollama https://github.com/ollama  tehty
 5. Stable-diffusion-webui https://github.com/AUTOMATIC1111/stable-diffusion-webui
 6. Transformers https://github.com/huggingface/transformers
