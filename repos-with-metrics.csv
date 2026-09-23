@@ -1064,7 +1064,7 @@ Significant-Gravitas,postman,https://github.com/Significant-Gravitas/postman,,si
 Significant-Gravitas,pr-agent-settings,https://github.com/Significant-Gravitas/pr-agent-settings,,side
 Significant-Gravitas,prisma-client-py,https://github.com/Significant-Gravitas/prisma-client-py,,side
 Significant-Gravitas,vcrpy,https://github.com/Significant-Gravitas/vcrpy,,side
-ollama,ollama,https://github.com/ollama/ollama,,main
+ollama,ollama,https://github.com/ollama/ollama,2026-06-07,main
 ollama,ollama-js,https://github.com/ollama/ollama-js,,side
 ollama,ollama-python,https://github.com/ollama/ollama-python,,side
 ollama,ollama-vscode,https://github.com/ollama/ollama-vscode,,side
@@ -2494,3 +2494,6 @@ gitlabhq,cli,https://github.com/gitlabhq/cli,,side
 gitlabhq,omnibus-gitlab,https://github.com/gitlabhq/omnibus-gitlab,,side
 gitlabhq,orbit-knowledge-graph,https://github.com/gitlabhq/orbit-knowledge-graph,,side
 gitlabhq,gitlab-runner,https://github.com/gitlabhq/gitlab-runner,,side
+ollama,ollama-js,https://github.com/ollama/ollama-js,,side
+ollama,ollama-python,https://github.com/ollama/ollama-python,,side
+ollama,ollama-vscode,https://github.com/ollama/ollama-vscode,,side

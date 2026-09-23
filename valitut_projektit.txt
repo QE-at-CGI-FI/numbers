@@ -13,10 +13,10 @@
 
 10 tunnetuinta open source projektia jotka käyttävät tekoälyä
 
-1. Openclaw https://github.com/openclaw
-2. TensorFlow https://github.com/tensorflow
+*1. Openclaw https://github.com/openclaw tehty
+*2. TensorFlow https://github.com/tensorflow tehty
 3. Auto gpt https://github.com/Significant-Gravitas
-4. Ollama https://github.com/ollama
+*4. Ollama https://github.com/ollama  tehty
 5. Stable-diffusion-webui https://github.com/AUTOMATIC1111/stable-diffusion-webui
 6. Transformers https://github.com/huggingface/transformers
 7. Open-webui https://github.com/open-webui
@@ -36,6 +36,6 @@
 *7. redis  Redis — https://github.com/redis  tehty
 *8. gitlab  https://github.com/gitlabhq  tehty
 *9. chromium  https://github.com/chromium  tehty
-10.sentry  https://github.com/getsentry
+*10.sentry  https://github.com/getsentry
 
 joko .github/copilot.mb tai .github/skills tai .github/agents tai .claude tai .cursor
