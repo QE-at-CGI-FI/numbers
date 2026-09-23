@@ -20,7 +20,7 @@
 5. Stable-diffusion-webui https://github.com/AUTOMATIC1111/stable-diffusion-webui
 6. Transformers https://github.com/huggingface/transformers
 *7. Open-webui https://github.com/open-webui tehty
-8. Langchain https://github.com/langchain-ai
+*8. Langchain https://github.com/langchain-ai  tehty
 *9. Claudecode https://github.com/anthropics/claude-code tehty
 10. Llama.cpp https://github.com/ggml-org/llama.cpp 
 
@@ -36,6 +36,6 @@
 *7. redis  Redis — https://github.com/redis  tehty
 *8. gitlab  https://github.com/gitlabhq  tehty
 *9. chromium  https://github.com/chromium  tehty
-*10.sentry  https://github.com/getsentry
+*10.sentry  https://github.com/getsentry  tehty
 
 joko .github/copilot.mb tai .github/skills tai .github/agents tai .claude tai .cursor
