@@ -2498,3 +2498,4 @@ gitlabhq,gitlab-runner,https://github.com/gitlabhq/gitlab-runner,,side
 ollama,ollama-js,https://github.com/ollama/ollama-js,,side
 ollama,ollama-python,https://github.com/ollama/ollama-python,,side
 ollama,ollama-vscode,https://github.com/ollama/ollama-vscode,,side
+AUTOMATIC1111,stable-diffusion-webui,https://github.com/AUTOMATIC1111/stable-diffusion-webui,,main
