@@ -1,0 +1,4 @@
+month,repos,commits,insertions,deletions,total_msg_chars,avg_insertions,avg_deletions,avg_msg_length,active_authors
+2026-06,1,34,64258,767,2662,1889.9,22.6,78.3,2
+2026-07,1,22,94521,63503,1826,4296.4,2886.5,83.0,1
+2026-08,1,11,50259,14951,945,4569.0,1359.2,85.9,1

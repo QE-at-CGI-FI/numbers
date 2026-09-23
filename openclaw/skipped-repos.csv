@@ -5,3 +5,6 @@ clawsweeper-state-archive-20260731,42208963,41219.7,too large to clone/process (
 docs,512269,500.3,too large to clone/process (0.49 GB)
 clawsweeper,529555,517.1,too large to clone/process (0.51 GB)
 Peekaboo,645251,630.1,too large to clone/process (0.62 GB)
+clownfish,368256,359.6,git log failed after clone (no error output) - skipped after one failed attempt
+clawgrit-reports,390949,381.8,clone failed over HTTPS (early EOF) - skipped after one failed attempt
+bun,397212,387.9,clone failed over HTTPS (early EOF) - skipped after one failed attempt
