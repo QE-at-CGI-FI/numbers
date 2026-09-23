@@ -22,7 +22,7 @@
 *7. Open-webui https://github.com/open-webui tehty
 *8. Langchain https://github.com/langchain-ai  tehty
 *9. Claudecode https://github.com/anthropics/claude-code tehty
-10. Llama.cpp https://github.com/ggml-org/llama.cpp 
+*10. Llama.cpp https://github.com/ggml-org/llama.cpp tehty
 
 
 10 tunnetua projektia jotka eivät ole ai työkaluja mutta käyttävät ai ta tekemisessä
