@@ -1,0 +1,2 @@
+repo,size_kb,size_mb,reason
+linux,6363014,6213.9,too large to clone/process (~6.1GB) - clone attempts kept stalling or dropping on current network - redo later on a better network
