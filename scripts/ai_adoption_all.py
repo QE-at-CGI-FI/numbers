@@ -113,6 +113,10 @@ def find_first_commit_for_path(owner, repo, path, rate_state):
 
 
 def main():
+    limit = None
+    if len(sys.argv) > 1 and sys.argv[1] == "--limit":
+        limit = int(sys.argv[2])
+
     repos = load_repo_list()
     progress = load_progress()
     rate_state = {"remaining": 5000}
@@ -124,10 +128,16 @@ def main():
         print(f"rate_limit check failed: {e}", file=sys.stderr)
 
     floor = 50
-    print(f"Starting with {rate_state['remaining']} requests remaining, {len(repos)} repos to check", file=sys.stderr)
+    limit_note = f", limit {limit} repos this run" if limit else ""
+    print(f"Starting with {rate_state['remaining']} requests remaining, {len(repos)} repos to check{limit_note}", file=sys.stderr)
 
     done_count = 0
     for org, repo in repos:
+        if limit is not None and done_count >= limit:
+            print(f"Reached limit of {limit} repos this run, stopping.", file=sys.stderr)
+            save_progress(progress)
+            return
+
         key = f"{org}/{repo}"
         entry = progress.get(key)
         if entry is not None and entry.get("_complete"):
