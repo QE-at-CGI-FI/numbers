@@ -2480,3 +2480,4 @@ chromium,crashpad,https://github.com/chromium/crashpad,,side
 chromium,openscreen,https://github.com/chromium/openscreen,,side
 chromium,pdfium,https://github.com/chromium/pdfium,,side
 chromium,dom-distiller,https://github.com/chromium/dom-distiller,,side
+oven-sh,bun,https://github.com/oven-sh/bun,2025-01-31,main

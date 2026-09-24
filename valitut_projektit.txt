@@ -30,7 +30,7 @@
 *1. selenium https://github.com/SeleniumHQ    tehty   ai aloitus Jan 19,2026
 *2. prestashop https://github.com/PrestaShop  tehty   ai aloitus Apr 8,2026
 *3. ghostty  https://github.com/ghostty-org/ghostty tehty    ai aloitus Sep 4,2025
-*4. bun  https://github.com/oven-sh/bun  tehty  ai aloitus  Jun 25,2025
+*4. bun  https://github.com/oven-sh/bun  tehty  ai aloitus  Jun 25,2025 [NEEDS RECONCILIATION: computed date is 2025-01-31 — .cursor first appeared then (AGENTS.md 2025-05-17); Jun 25, 2025 is when .claude was added]
 *5. ladybird  https://github.com/LadybirdBrowser/ladybird tehty      
 *6. curl  curl — https://github.com/curl  tehty
 *7. redis  Redis — https://github.com/redis  tehty
