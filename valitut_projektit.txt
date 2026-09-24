@@ -3,7 +3,7 @@
 1. linux kernel https://github.com/torvalds/linux
 *2. react  https://github.com/react  tehty    ai aloitus jan 24, 2026
 *3. kubernetes https://github.com/kubernetes  tehty     ai aloitus May 9, 2026
-*4. VS code  https://github.com/microsoft/vscode tehty       ai aloitus Oct 26, 2025
+*4. VS code  https://github.com/microsoft/vscode tehty       ai aloitus Oct 26, 2025 [NEEDS RECONCILIATION: computed date is 2024-11-28 — .github/copilot-instructions.md first appeared then; Oct 26, 2025 is when .github/agents was added]
 *5. TensorFlow https://github.com/tensorflow  tehty
 *6. node.js https://github.com/nodejs  tehty
 *7. Rust https://github.com/rust-lang  tehty          ai aloitus Aug 12 2026

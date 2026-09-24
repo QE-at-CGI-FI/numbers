@@ -9,6 +9,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -60,20 +61,28 @@ def gh_request(url):
     if GH_TOKEN:
         headers["Authorization"] = f"Bearer {GH_TOKEN}"
     req = urllib.request.Request(url, headers=headers)
-    try:
-        with urllib.request.urlopen(req) as resp:
-            remaining = int(resp.headers.get("X-RateLimit-Remaining", "0"))
-            link = resp.headers.get("Link", "")
-            body = json.loads(resp.read().decode())
-            return body, link, remaining, resp.status
-    except urllib.error.HTTPError as e:
-        remaining = int(e.headers.get("X-RateLimit-Remaining", "0"))
-        if e.code in (404, 409):
-            return [], "", remaining, e.code
-        if e.code == 403:
-            # rate limited or abuse-detection backoff
-            return [], "", 0, 403
-        raise
+    # retry transient server/network errors (GitHub occasionally 500s on
+    # commits?path= for some repos) before giving up
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                remaining = int(resp.headers.get("X-RateLimit-Remaining", "0"))
+                link = resp.headers.get("Link", "")
+                body = json.loads(resp.read().decode())
+                return body, link, remaining, resp.status
+        except urllib.error.HTTPError as e:
+            remaining = int(e.headers.get("X-RateLimit-Remaining", "0"))
+            if e.code in (404, 409):
+                return [], "", remaining, e.code
+            if e.code == 403:
+                # rate limited or abuse-detection backoff
+                return [], "", 0, 403
+            if e.code < 500 or attempt == 3:
+                raise
+        except (urllib.error.URLError, TimeoutError):
+            if attempt == 3:
+                raise
+        time.sleep(5 * (attempt + 1))
 
 
 def last_page_url(link_header):
@@ -157,7 +166,13 @@ def main():
                 print(f"Rate limit nearly exhausted at {done_count}/{len(repos)} repos, stopping.", file=sys.stderr)
                 save_progress(progress)
                 return
-            date, status = find_first_commit_for_path(org, repo, path, rate_state)
+            try:
+                date, status = find_first_commit_for_path(org, repo, path, rate_state)
+            except Exception as e:
+                # leave this repo incomplete so a rerun retries it
+                print(f"{key} {path}: {e}, skipping repo for now", file=sys.stderr)
+                status = "error"
+                break
             if status == "rate_limited":
                 print(f"Hit 403/rate-limit at {done_count}/{len(repos)} repos, stopping.", file=sys.stderr)
                 save_progress(progress)
@@ -166,6 +181,8 @@ def main():
             if status == "repo_not_found":
                 repo_missing = True
 
+        if any(path not in entry for path in CANDIDATE_PATHS):
+            continue
         entry["_complete"] = True
         done_count += 1
         if done_count % 20 == 0:
