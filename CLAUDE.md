@@ -107,8 +107,8 @@ misses markers that were later removed or renamed.
 
 ### Scope
 
-`ai_adoption_date` is fully populated for all 995 rows (13 `repo_type=main` +
-982 `repo_type=side`), completed 2026-09-22. 60 rows have a real date; the
+`ai_adoption_date` is fully populated for all 2481 rows (26 `repo_type=main` +
+2455 `repo_type=side`), completed 2026-09-24. 332 rows have a real date; the
 rest are genuinely blank (no marker ever appeared in that repo's history),
 except 9 `PrestaShop` rows that 404'd outright (typo'd/renamed filenames —
 `ps_chackpayment`, `blockreasurrance`, `classi-theme`, `pa_customeraccountlinks`,
