@@ -17,7 +17,7 @@
 *2. TensorFlow https://github.com/tensorflow tehty
 *3. Auto gpt https://github.com/Significant-Gravitas tehty
 *4. Ollama https://github.com/ollama  tehty
-5. Stable-diffusion-webui https://github.com/AUTOMATIC1111/stable-diffusion-webui
+*5. Stable-diffusion-webui https://github.com/AUTOMATIC1111/stable-diffusion-webui tehty
 *6. Transformers https://github.com/huggingface/transformers
 *7. Open-webui https://github.com/open-webui tehty
 *8. Langchain https://github.com/langchain-ai  tehty
@@ -39,3 +39,8 @@
 *10.sentry  https://github.com/getsentry  tehty
 
 joko .github/copilot.mb tai .github/skills tai .github/agents tai .claude tai .cursor
+
+screenshotit on täällä file:///C:/Users/tomas/numbers/screenshots.html
+
+
+sivu mihin voi laittaa tietoja on täällä https://qe-at-cgi-fi.github.io/numbers/
