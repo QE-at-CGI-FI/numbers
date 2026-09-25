@@ -1,4 +1,4 @@
-month,repos,commits,insertions,deletions,total_msg_chars,avg_insertions,avg_deletions,avg_msg_length
-2025-08,1,37,7102,1706,2166,191.9,46.1,58.5
-2026-03,1,4,331,315,495,82.8,78.8,123.8
-2026-04,1,1,1,1,110,1.0,1.0,110.0
+month,repos,commits,insertions,deletions,total_msg_chars,avg_insertions,avg_deletions,avg_msg_length,active_authors
+2025-08,1,37,7102,1706,2166,191.9,46.1,58.5,5
+2026-03,1,4,331,315,495,82.8,78.8,123.8,1
+2026-04,1,1,1,1,110,1.0,1.0,110.0,1
