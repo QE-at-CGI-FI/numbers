@@ -1,5 +1,5 @@
-month,repos,commits,insertions,deletions,total_msg_chars,avg_insertions,avg_deletions,avg_msg_length
-2026-06,1,64,12721,943,2752,198.8,14.7,43.0
-2026-07,1,8,13666,2041,393,1708.2,255.1,49.1
-2026-08,1,11,923,788,629,83.9,71.6,57.2
-2026-09,1,32,3488,2275,1557,109.0,71.1,48.7
+month,repos,commits,insertions,deletions,total_msg_chars,avg_insertions,avg_deletions,avg_msg_length,active_authors
+2026-06,1,64,12721,943,2752,198.8,14.7,43.0,2
+2026-07,1,8,13666,2041,393,1708.2,255.1,49.1,3
+2026-08,1,11,923,788,629,83.9,71.6,57.2,3
+2026-09,1,32,3488,2275,1557,109.0,71.1,48.7,3
