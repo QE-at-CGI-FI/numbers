@@ -40,7 +40,7 @@
 
 joko .github/copilot.mb tai .github/skills tai .github/agents tai .claude tai .cursor
 
-screenshotit on täällä file:///C:/Users/tomas/numbers/screenshots.html
+screenshotit on täällä https://qe-at-cgi-fi.github.io/numbers/screenshots.html
 
 
 sivu mihin voi laittaa tietoja on täällä https://qe-at-cgi-fi.github.io/numbers/

@@ -1,2 +1,2 @@
-month,repos,commits,insertions,deletions,total_msg_chars,avg_insertions,avg_deletions,avg_msg_length
-2025-07,1,4,613826,605915,116,153456.5,151478.8,29.0
+month,repos,commits,insertions,deletions,total_msg_chars,avg_insertions,avg_deletions,avg_msg_length,active_authors
+2025-07,1,4,613826,605915,116,153456.5,151478.8,29.0,1
